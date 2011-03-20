@@ -16,6 +16,9 @@ public class MetaModMenu {
 		this.sendTime = new Date().getTime();
 	}
 	
+	
+	
+	
 	/*
 	 * Has the menu faded away / anything??
 	 * TODO: remove? not used anyway

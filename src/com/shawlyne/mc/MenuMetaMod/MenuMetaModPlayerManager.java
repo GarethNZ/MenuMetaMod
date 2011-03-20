@@ -46,12 +46,13 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	{
     		// Maybe a response
     		try{
-    			int response = Integer.parseInt(pe.getMessage());
+    			int response = Integer.parseInt(pe.getMessage()) - 1; // inputs 1-9,0
+    			if( response < 0 ) response = 9; // 0 = the tenth
     			if( !menu.validResponse(response) )
     			{
-    				pe.getPlayer().sendMessage(response +" is not a valid option");
+    				pe.getPlayer().sendMessage("Invalid Option " + (response+1));
     				// Resend menu?
-    				// skip for now (menu still active)
+    				sendMenu(pe.getPlayer(), menu);
     			}
     			else
     			{
@@ -88,9 +89,17 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     {
     	playerMenus.put(p, menu);
     	p.sendMessage("Options: ");
-    	for(int o = 0; o < menu.options.length; o++)
+    	// Num. <OptionText>
+    	// order is 1-9, 0
+    	for(int o = 1; o < (menu.options.length+1); o++)
     	{
-    		p.sendMessage((o)+". "+menu.options[o]);
+    		if( o < 10 )
+    			p.sendMessage((o)+". "+menu.options[o-1]);
+    		else // Do not allow > 10... 1-9,0
+    		{
+    			p.sendMessage("0. "+menu.options[9]);
+    			break;
+    		}
     	}
     }
 
