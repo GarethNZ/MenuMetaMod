@@ -3,13 +3,36 @@ package com.shawlyne.mc.MenuMetaMod;
 import java.util.Date;
 
 public class MetaModMenu {
+	public String title;
 	public String[] options;// text
 	public String[] commands; // result
 	private long sendTime; // used for timeout
 	
-	public MetaModMenu(String[] options, String[] commands){// throws Exception {
-		this.options = options;
-		this.commands = commands;
+	public int pages;
+	public int optionCount;
+	
+	public MetaModMenu(String t, String[] o, String[] c){// throws Exception {
+		title = t;
+		options = o;
+		commands = c;
+		if( options.length != commands.length )
+		{
+			// TODO: throw ... 
+			return;
+		}
+		
+		
+		optionCount = this.options.length;
+		pages = 1;
+		
+		if( optionCount > 10 )
+		{
+			int options = optionCount-9;
+			pages += (options/8);
+			if( options % 8 != 0 )
+				pages++;
+		}
+		
 		//if( options.length != commands.length )
 		//	throw new Exception("Array size lengths not equal");
 		
@@ -33,10 +56,20 @@ public class MetaModMenu {
 		else
 			return false;
 	}
-
-	public boolean validResponse(int response) {
-		return (response < commands.length);
-			
+	
+	public String getCommand(int response, int page) // 1 - 10
+	{
+		int optionOffset = 0;
+		if( page > 1 )
+		{
+			optionOffset = 9;
+			optionOffset += ((page-2)*8); // not first two
+		}
+		if( commands.length < (optionOffset+response-1) )
+			return null;
+		else
+			return commands[optionOffset+response-1];
 	}
+	
 	
 }
