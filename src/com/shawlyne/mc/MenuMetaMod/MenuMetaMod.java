@@ -1,5 +1,7 @@
 package com.shawlyne.mc.MenuMetaMod;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
@@ -31,17 +33,29 @@ public class MenuMetaMod extends JavaPlugin {
     	playerManager.empty();
     }
     
-    public boolean isDebugging(final Player player) {
-        /*if (debugees.containsKey(player)) {
-            return debugees.get(player);
-        } else {
-            return false;
-        }*/
-        return true;
-    }
-
-    public void setDebugging(final Player player, final boolean value) {
-        //debugees.put(player, value);
+    public boolean onCommand(CommandSender sender, Command command,
+			String commandLabel, String[] args) {
+    		
+    		if (command.getName().equalsIgnoreCase("menu") )
+    		{
+    			if( !(sender instanceof Player) )
+    	    		return false;
+    			Player player = (Player)sender;
+    		
+    			if( args.length >= 1)
+    			{
+    				try{
+    					int response = Integer.parseInt(args[0]); // inputs 1-9,0
+    					playerManager.onPlayerResponse(player, response);
+    					
+    					return true;
+		    		}
+		    		catch(NumberFormatException e)
+		    		{} 
+    			}    			
+    			player.sendMessage("Error in command format. Should be /menu <integer>");
+    		}
+    		return false;
     }
     
     public static void sendMenu(Player p, MetaModMenu menu)

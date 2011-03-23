@@ -23,11 +23,7 @@ import org.bukkit.event.player.PlayerListener;
  *  Prev Page is always option 9
  */
 public class MenuMetaModPlayerManager extends PlayerListener {
-	private static String[] optionText = {
-			"1","2","3","4","5",
-			"6","7","8","9","0"						    
-	};
-    /*private final MenuMetaMod plugin;
+	/*private final MenuMetaMod plugin;
 
     public MenuMetaModPlayerManager(MenuMetaMod instance) {
         plugin = instance;
@@ -52,6 +48,14 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 					commands
 			);
 	
+	MetaModValueMenu TestValueMenu = new MetaModValueMenu(
+			"Test Value Menu",
+			options,
+			commands,
+			"How many do you want?"
+	);
+	
+	
     public void onPlayerJoin(PlayerEvent pe)
     {
     	//MenuMetaMod.sendMenu(pe.getPlayer(), TestMenu);
@@ -66,51 +70,20 @@ public class MenuMetaModPlayerManager extends PlayerListener {
      */
     public void onPlayerChat(PlayerChatEvent pe)
     {
-    	MetaModMenu menu = null;
     	
     	if( pe.isCancelled() ) return;
     	
-    	if( (menu = playerMenus.get(pe.getPlayer())) != null ) // if player has menu
+    	if( pe.getPlayer() == null) return;
+    	
+    	Player player = pe.getPlayer();
+    	
+    	if( playerMenus.get(player) != null ) // if player has menu
     	{
     		// Maybe a response
     		try{
     			int response = Integer.parseInt(pe.getMessage()); // inputs 1-9,0
-    			if( response == 0 ) response = 10; // 0 = the tenth
+    			onPlayerResponse(player,response);
     			
-    			int page = 1;
-    			if( playerPage.get(pe.getPlayer()) != null )
-    			{
-    				page = playerPage.get(pe.getPlayer()).intValue();
-    				
-    			}
-    			
-    			if( menu.pages > page && response == 10 )
-    			{
-    				// Next page
-    				sendMenu(pe.getPlayer(), menu, page+1);
-    			}
-    			else if( page > 1 && response == 9)
-    			{
-    				// Prev page
-    				sendMenu(pe.getPlayer(), menu, page-1);
-    			}
-    			else
-    			{
-	    			String command = menu.getCommand(response, page);
-	    			if( command == null )
-	    			{
-	    				pe.getPlayer().sendMessage("Invalid Option " + (response));
-	    				// Resend menu?
-	    				sendMenu(pe.getPlayer(), menu, page);
-	    			}
-	    			else
-	    			{
-	    				playerMenus.remove(pe.getPlayer()); // menu finished
-	    				playerPage.remove(pe.getPlayer());
-	    				pe.getPlayer().sendMessage("PerformCommand: " + command);
-	    				pe.getPlayer().performCommand(command);
-	    			}
-    			}
     			pe.setCancelled(true);
     			
     		}
@@ -123,10 +96,44 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	// For testing
     	if( pe.getMessage().equals("?") )
     	{
-    		sendMenu(pe.getPlayer(),TestMenu);
+    		sendMenu(player,TestMenu);
     		pe.setCancelled(true);
     	}
+    	if( pe.getMessage().equals(">") )
+    	{
+    		sendMenu(player,TestValueMenu);
+    		pe.setCancelled(true);
+    	}
+    	
     	// end testing
+    }
+    
+    public void onPlayerResponse(Player player, int response)
+    {
+    	MetaModMenu menu = null;
+    	if( playerMenus.get(player) == null )
+    		return;
+    	menu = playerMenus.get(player);
+    	
+    	int page = 1;
+		if( playerPage.get(player) != null )
+		{
+			page = playerPage.get(player).intValue();
+			
+		}
+		
+		ResponseStatus handled = menu.handleResponse(player, response, page);
+		if( handled == ResponseStatus.NotHandled )
+		{
+			player.sendMessage("Invalid Option " + (response));
+			// Resend menu?
+			menu.send(player, page);
+		}
+		else if( handled == ResponseStatus.HandledFinished)
+		{
+			playerMenus.remove(player); // menu finished
+			playerPage.remove(player);
+		}
     }
 
     /**
@@ -144,6 +151,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
      * @param p - Player to send to 
      * @param menu - MetaModMenu to send 
      * @param page - int Page number 1+
+     * @return sent successfully
      */
     public boolean sendMenu(Player p, MetaModMenu menu, int page)
     {
@@ -153,51 +161,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	playerMenus.put(p, menu);
     	playerPage.put(p, Integer.valueOf(page));
     	
-    	if( page > menu.pages )
-    		return false; // throw error?
-    	
-    	int optionsToSend = menu.options.length+1;
-    	int firstOption = 0;
-		
-    	if( page > 1 )
-		{
-			firstOption = 9;
-			firstOption += ((page-2)*8); // not first 2 pages
-		}
-    	
-    	if( menu.pages > 1 )
-    	{
-    		optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
-    		
-    		// check not too many
-    		if( (menu.options.length - firstOption) < optionsToSend )
-    		{
-    			optionsToSend = menu.options.length - firstOption;
-    		}
-    	}
-    	
-    	p.sendMessage("##Menu: " + menu.title);
-    	int o = 0;
-    	for(; o < optionsToSend ; o++)
-    	{
-    		p.sendMessage(optionText[o]+". "+menu.options[firstOption+o]);
-    	}
-    	// Add next / prev
-    	if( page > 1 )
-		{
-			// Add a 'prev page option'
-			//p.sendMessage(optionText[o]+". "+ChatColor.BLUE + "Prev Page");
-    		p.sendMessage("9. "+ChatColor.BLUE + "Prev Page");
-			o++;
-		}
-		if( menu.pages > page )
-		{
-			// Add a 'next page option'
-			//p.sendMessage(optionText[o]+". "+ChatColor.BLUE + "Next Page");
-			p.sendMessage("0. "+ChatColor.BLUE + "Next Page");
-		}
-		
-    	return true;
+    	return menu.send(p, page);
     }
 
 	public void empty() {
