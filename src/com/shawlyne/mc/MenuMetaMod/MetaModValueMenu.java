@@ -19,7 +19,7 @@ public class MetaModValueMenu extends MetaModMenu {
 		// Check if player is just responding to value question
 		if( valuesPending.get(player) != null )
 		{
-			player.sendMessage("Got value: " + response);
+			//player.sendMessage("Got value: " + response);
 			String command = valuesPending.get(player);
 			command += " " + response;
 			player.sendMessage("performCommand: " + command);
@@ -29,8 +29,41 @@ public class MetaModValueMenu extends MetaModMenu {
 		}
 		
 		
+		// NOTE: Can't call super.handleResponse because we also need to add valuesPending :(
 		// Normal MetaModMenu behaviour
-		return super.handleResponse(player, response, page);
+		int optionOffset = 0;
+		
+		if( response == 0 ) response = 10; // 0 = the tenth
+		
+		if( pages > page && response == 10 )
+		{
+			// Next page
+			MenuMetaModPlayerManager.sendMenu(player, this, page+1);
+			return ResponseStatus.Handled;
+		}
+		else if( page > 1 && response == 9)
+		{
+			// Prev page
+			MenuMetaModPlayerManager.sendMenu(player, this, page-1);
+			return ResponseStatus.Handled;
+		}
+		
+		if( page > 1 )
+		{
+			optionOffset = 9;
+			optionOffset += ((page-2)*8); // not first two
+		}
+		if( commands.length < (optionOffset+response-1) )
+			return ResponseStatus.NotHandled;
+		else
+		{
+			if( MenuMetaModPlayerManager.playerClientMod.get(player) != null )
+				player.sendMessage("##Value_" + valueQuestion);
+			else
+				player.sendMessage(valueQuestion);
+			valuesPending.put(player, commands[optionOffset+response-1]);
+			return ResponseStatus.Handled;
+		}
 	}
 
 }

@@ -21,8 +21,7 @@ public class MenuMetaMod extends JavaPlugin {
         // Register our events
         PluginManager pm = getServer().getPluginManager();
        
-        pm.registerEvent(Event.Type.PLAYER_JOIN, playerManager, Priority.High, this);
-        pm.registerEvent(Event.Type.PLAYER_CHAT, playerManager, Priority.High, this);
+        pm.registerEvent(Event.Type.PLAYER_CHAT, playerManager, Priority.Monitor, this);
 
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
@@ -30,7 +29,7 @@ public class MenuMetaMod extends JavaPlugin {
     public void onDisable() {
         // NOTE: All registered events are automatically unregistered when a plugin is disabled
     	
-    	playerManager.empty();
+    	MenuMetaModPlayerManager.empty();
     }
     
     public boolean onCommand(CommandSender sender, Command command,
@@ -44,23 +43,37 @@ public class MenuMetaMod extends JavaPlugin {
     		
     			if( args.length >= 1)
     			{
+    				for(int i = 0; i < args.length; i++)
+    				{
+    					System.out.println( i + ". " + args[i]);
+    				}
     				try{
-    					int response = Integer.parseInt(args[0]); // inputs 1-9,0
+    					int response = Integer.parseInt(args[0]); 
     					playerManager.onPlayerResponse(player, response);
     					
     					return true;
 		    		}
 		    		catch(NumberFormatException e)
 		    		{} 
+		    		if( args[0].equalsIgnoreCase("modinstalled") )
+		    			playerManager.setClientMod(player,true);
     			}    			
     			player.sendMessage("Error in command format. Should be /menu <integer>");
     		}
     		return false;
     }
     
+    /**
+     * Wraps MenuMetaModPlayerManager.sendMenu so we can have a nicer API
+     * TODO: Move function to here cause of static vars anyway?
+     * Description: Will show the first page if there are > 1 page.
+     * Additional pages handled within MenuMetaModPlayerManager
+     * @param p - Player to send to
+     * @param menu - The MetaModMenu to show 
+     */
     public static void sendMenu(Player p, MetaModMenu menu)
     {
-    	playerManager.sendMenu(p, menu);
+    	MenuMetaModPlayerManager.sendMenu(p, menu);
     }
 }
 
