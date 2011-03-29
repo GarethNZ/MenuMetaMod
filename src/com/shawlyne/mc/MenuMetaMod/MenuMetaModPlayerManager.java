@@ -127,18 +127,28 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			
 		}
 		
+		//System.out.println("Player responded to Menu: \""+menu.title+"\" Page: " + page+ " With: \'"+response+"\'");
+    	
 		ResponseStatus handled = menu.handleResponse(player, response, page);
 		if( handled == ResponseStatus.NotHandled )
 		{
+			//System.out.println("Invalid Option " + (response));
 			player.sendMessage("Invalid Option " + (response));
 			// Resend menu?
 			MenuMetaModPlayerManager.sendMenu(player, menu, page);
 		}
 		else if( handled == ResponseStatus.HandledFinished)
 		{
+			//System.out.println("HandledFinished");
 			playerMenus.remove(player); // menu finished
 			playerPage.remove(player);
 		}
+		/*// temp
+		else
+		{
+			System.out.println("Handled but not finished");
+		}
+		//*/
     }
 
     /**

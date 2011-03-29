@@ -43,9 +43,10 @@ public class MenuMetaMod extends JavaPlugin {
     		
     			if( args.length >= 1)
     			{
-    				for(int i = 0; i < args.length; i++)
+    				if( args[0].equalsIgnoreCase("modinstalled") )
     				{
-    					System.out.println( i + ". " + args[i]);
+		    			playerManager.setClientMod(player,true);
+		    			return true;
     				}
     				try{
     					int response = Integer.parseInt(args[0]); 
@@ -54,9 +55,10 @@ public class MenuMetaMod extends JavaPlugin {
     					return true;
 		    		}
 		    		catch(NumberFormatException e)
-		    		{} 
-		    		if( args[0].equalsIgnoreCase("modinstalled") )
-		    			playerManager.setClientMod(player,true);
+		    		{
+		    			
+		    		} 
+		    		
     			}    			
     			player.sendMessage("Error in command format. Should be /menu <integer>");
     		}
