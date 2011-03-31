@@ -198,13 +198,13 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	if( menu.pages > 1 )
     	{
     		optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
-    		
-    		// check not too many
-    		if( (menu.options.length - firstOption) < optionsToSend )
-    		{
-    			optionsToSend = menu.options.length - firstOption;
-    		}
     	}
+    	
+    	// check not too many
+		if( (menu.options.length - firstOption) < optionsToSend )
+		{
+			optionsToSend = menu.options.length - firstOption;
+		}
     	
     	player.sendMessage(startString);
     	int o = 0;
