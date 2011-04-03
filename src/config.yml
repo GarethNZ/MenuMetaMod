@@ -1,7 +1,7 @@
 menus:
-    Title:
-    	type: Menu
-        command: /menu1
+    Configured Menu:
+        type: Menu
+        command: menu1
         options: 
-            - Warp Menu : wm
-            - Warp to Spawn : warp spawn
+            Warp Menu : /wm
+            Warp to Spawn : /warp spawn
