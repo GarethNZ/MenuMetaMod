@@ -8,6 +8,6 @@ commands:
     menu:
         description: Player specific menu response commands
         usage: /menu
-    m:
+    quick:
         description: Launch config specified menu
-        usage: /m <Menu.command from config file>
+        usage: /quick [Menu.command from config file]

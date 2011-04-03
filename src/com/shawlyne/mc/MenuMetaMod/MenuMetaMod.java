@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -29,7 +29,9 @@ public class MenuMetaMod extends JavaPlugin {
     private final static MenuMetaModPlayerManager playerManager = new MenuMetaModPlayerManager();
     protected final Logger log;
     Configuration config;
+    // Menus accessible by "/quick <String>"
     HashMap<String,MetaModMenu> configuredMenus = new HashMap<String,MetaModMenu>(); // command,menu
+    MetaModMenu quickMenu; // default menu that responds to "/quick" 
     
     public MenuMetaMod()
     {
@@ -69,6 +71,8 @@ public class MenuMetaMod extends JavaPlugin {
 					ConfigurationNode menudata = config.getNode("menus."+title);
 					String type = menudata.getString("type");
 					String command = menudata.getString("command");
+					if( command.startsWith("/") ) // remove starting '/'
+						command = command.substring(1);
 					List <String> options = menudata.getKeys("options");
 					
 					if( options != null && options.size() > 0 )
@@ -77,6 +81,8 @@ public class MenuMetaMod extends JavaPlugin {
 						for(String option : options)
 						{
 							String optionCommand = menudata.getString("options."+option);
+							if( optionCommand.startsWith("/") ) // remove starting '/'
+								optionCommand = optionCommand.substring(1);
 							System.out.println("MenuItem: " + option + " - " + optionCommand);
 							commands.add(optionCommand);
 						}
@@ -87,13 +93,15 @@ public class MenuMetaMod extends JavaPlugin {
 						if( type.equalsIgnoreCase("Menu") )
 						{
 							MetaModMenu menu = new MetaModMenu(title, opts, comms);
+							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
 							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/m "+ command+"'");
 						}
 						else if( type.equalsIgnoreCase("ValueMenu") )
 						{
 							String question = menudata.getString("question");
-							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question); 
+							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question);
+							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
 							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/m "+ command+"'");
 						}
@@ -143,6 +151,7 @@ public class MenuMetaMod extends JavaPlugin {
     				if( args[0].equalsIgnoreCase("modinstalled") )
     				{
 		    			playerManager.setClientMod(player,true);
+		    			player.sendMessage(ChatColor.AQUA+" MenuMod detected");
 		    			return true;
     				}
     				try{
@@ -159,7 +168,7 @@ public class MenuMetaMod extends JavaPlugin {
     			}    			
     			player.sendMessage("Error in command format. Should be /menu <integer>");
     		}
-    		else if( command.getName().equalsIgnoreCase("m") )
+    		else if( command.getName().equalsIgnoreCase("quick") )
     		{
     			if( !(sender instanceof Player) )
     	    		return false;
@@ -171,6 +180,12 @@ public class MenuMetaMod extends JavaPlugin {
     				if( menu == null )
     					return false;
     				MenuMetaModPlayerManager.sendMenu(player, menu);
+    				return true;
+    			}
+    			else if( quickMenu != null)
+    			{
+    				// Default menu
+    				MenuMetaModPlayerManager.sendMenu(player, quickMenu);
     				return true;
     			}
     		}

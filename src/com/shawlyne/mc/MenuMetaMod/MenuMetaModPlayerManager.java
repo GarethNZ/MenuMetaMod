@@ -8,6 +8,8 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 
+import sun.util.logging.resources.logging;
+
 /**
  * Handle events for all Player related events
  * @author GarethNZ
@@ -140,8 +142,15 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 		else if( handled == ResponseStatus.HandledFinished)
 		{
 			//System.out.println("HandledFinished");
-			playerMenus.remove(player); // menu finished
-			playerPage.remove(player);
+			if( playerMenus.get(player) != menu )
+			{
+				System.out.println("Hmmm... asynchronous / I dunno what order, but now the player has a new menu...");
+			}
+			else
+			{
+				playerMenus.remove(player); // menu finished
+				playerPage.remove(player);
+			}
 		}
 		/*// temp
 		else
