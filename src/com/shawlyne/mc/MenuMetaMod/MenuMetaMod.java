@@ -95,7 +95,7 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModMenu menu = new MetaModMenu(title, opts, comms);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/m "+ command+"'");
+							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/quick "+ command+"'");
 						}
 						else if( type.equalsIgnoreCase("ValueMenu") )
 						{
@@ -103,7 +103,7 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/m "+ command+"'");
+							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/quick "+ command+"'");
 						}
 						else
 						{
