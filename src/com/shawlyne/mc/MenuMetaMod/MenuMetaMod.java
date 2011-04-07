@@ -168,7 +168,7 @@ public class MenuMetaMod extends JavaPlugin {
     			}    			
     			player.sendMessage("Error in command format. Should be /menu <integer>");
     		}
-    		else if( command.getName().equalsIgnoreCase("quick") )
+    		else if( command.getName().equalsIgnoreCase("qm") )
     		{
     			if( !(sender instanceof Player) )
     	    		return false;

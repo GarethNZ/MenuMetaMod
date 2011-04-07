@@ -8,8 +8,6 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 
-import sun.util.logging.resources.logging;
-
 /**
  * Handle events for all Player related events
  * @author GarethNZ
