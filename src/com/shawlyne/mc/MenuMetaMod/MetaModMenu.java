@@ -62,39 +62,53 @@ public class MetaModMenu {
 	}
 	
 	// Expected Response: 1-9,0
-	public ResponseStatus handleResponse(Player player, int response, int page) // 1 - 10
+	public ResponseStatus handleResponse(Player player, String r, int page) // 1 - 10
 	{
 		int optionOffset = 0;
+		if( isNumber(r) )
+		{
+			int response = Integer.valueOf(r).intValue();
 		
-		if( response == 0 ) response = 10; // 0 = the tenth
-		
-		if( pages > page && response == 10 )
-		{
-			// Next page
-			MenuMetaModPlayerManager.sendMenu(player, this, page+1);
-			return ResponseStatus.Handled;
+			if( response == 0 ) response = 10; // 0 = the tenth
+			
+			if( pages > page && response == 10 )
+			{
+				// Next page
+				MenuMetaModPlayerManager.sendMenu(player, this, page+1);
+				return ResponseStatus.Handled;
+			}
+			else if( page > 1 && response == 9)
+			{
+				// Prev page
+				MenuMetaModPlayerManager.sendMenu(player, this, page-1);
+				return ResponseStatus.Handled;
+			}
+			
+			if( page > 1 )
+			{
+				optionOffset = 9;
+				optionOffset += ((page-2)*8); // not first two
+			}
+			if( commands.length < (optionOffset+response-1) )
+				return ResponseStatus.NotHandled;
+			else
+			{
+				if( MenuMetaMod.debug )
+					player.sendMessage("Performing command " + commands[optionOffset+response-1]);
+				player.performCommand( commands[optionOffset+response-1] );
+				return ResponseStatus.HandledFinished;
+			}
 		}
-		else if( page > 1 && response == 9)
-		{
-			// Prev page
-			MenuMetaModPlayerManager.sendMenu(player, this, page-1);
-			return ResponseStatus.Handled;
-		}
-		
-		if( page > 1 )
-		{
-			optionOffset = 9;
-			optionOffset += ((page-2)*8); // not first two
-		}
-		if( commands.length < (optionOffset+response-1) )
-			return ResponseStatus.NotHandled;
-		else
-		{
-			player.sendMessage("Performing command " + commands[optionOffset+response-1]);
-			player.performCommand( commands[optionOffset+response-1] );
-			return ResponseStatus.HandledFinished;
-		}
+		return ResponseStatus.NotHandled;
 	}
+	
+	
+	// helper for the responses
+    public static boolean isNumber(String s)
+	{
+		return s.matches("[0-9]+");
+	}
+    
 
 
 

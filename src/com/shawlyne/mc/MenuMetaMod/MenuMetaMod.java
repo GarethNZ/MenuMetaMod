@@ -27,7 +27,8 @@ import org.bukkit.util.config.ConfigurationNode;
  */
 public class MenuMetaMod extends JavaPlugin {
     private final static MenuMetaModPlayerManager playerManager = new MenuMetaModPlayerManager();
-    protected final Logger log;
+    public static boolean debug = false;
+    public static Logger log;
     Configuration config;
     // Menus accessible by "/quick <String>"
     HashMap<String,MetaModMenu> configuredMenus = new HashMap<String,MetaModMenu>(); // command,menu
@@ -62,6 +63,11 @@ public class MenuMetaMod extends JavaPlugin {
 		
 		if( config != null )
 		{
+			if( config.getKeys("debug") != null && config.getKeys("debug").size() > 0 )
+			{
+				debug = true;
+				log.info("Debug mode enabled");
+			}
 			// Load in the values from the configuration file
 			List <String> menukeys = config.getKeys("menus");
 			if( menukeys != null )
@@ -95,7 +101,7 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModMenu menu = new MetaModMenu(title, opts, comms);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/quick "+ command+"'");
+							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
 						}
 						else if( type.equalsIgnoreCase("ValueMenu") )
 						{
@@ -103,7 +109,7 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/quick "+ command+"'");
+							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
 						}
 						else
 						{
@@ -119,7 +125,7 @@ public class MenuMetaMod extends JavaPlugin {
 			
 		}
 		else
-			System.out.println("Error accessing Config");
+			log.log(Level.WARNING, "Error accessing Config");
 
 		
 		
@@ -154,9 +160,9 @@ public class MenuMetaMod extends JavaPlugin {
 		    			player.sendMessage(ChatColor.AQUA+" MenuMod detected");
 		    			return true;
     				}
+    				// Possible page response
     				try{
-    					int response = Integer.parseInt(args[0]); 
-    					playerManager.onPlayerResponse(player, response);
+    					playerManager.onPlayerResponse(player, args[0]);
     					
     					return true;
 		    		}
@@ -191,7 +197,7 @@ public class MenuMetaMod extends JavaPlugin {
     		}
     		return false;
     }
-    
+
     /**
      * Wraps MenuMetaModPlayerManager.sendMenu so we can have a nicer API
      * TODO: Move function to here cause of static vars anyway?

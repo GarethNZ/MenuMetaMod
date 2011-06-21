@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 
 /**
@@ -32,37 +31,6 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 	public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
 	public static HashMap<Player,Boolean> playerClientMod = new HashMap<Player,Boolean>();
 	
-	// For testing
-	String[] options = {"This 1", "That 2", "A 3", "Extra 4", "Another 5",
-			"This 6", "That 7", "A 8", "Extra 9", "Another 10",
-			"This 11", "That 12", "A 13", "Extra 14", "Another 15",
-			"This 16", "That 17", "A 18", "Extra 19", "Another 20",
-	};
-	String[] commands = {"Command 1", "Command 2", "Command 3", "Command 4","Command 5",
-			"Command 6", "Command 7", "Command 8", "Command 9","Command 10",
-			"Command 11", "Command 12", "Command 13", "Command 14","Command 15",
-			"Command 16", "Command 17", "Command 18", "Command 19","Command 20"
-	};
-	MetaModMenu TestMenu = new MetaModMenu( 
-					"Test Menu",
-					options,
-					commands
-			);
-	
-	MetaModValueMenu TestValueMenu = new MetaModValueMenu(
-			"Test Value Menu",
-			options,
-			commands,
-			"How many do you want?"
-	);
-	
-	
-    public void onPlayerJoin(PlayerEvent pe)
-    {
-    	//MenuMetaMod.sendMenu(pe.getPlayer(), TestMenu);
-    }
-    
-    // End for testing
     
     /**
      * Handle response.. if it is a response to a menu
@@ -82,8 +50,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	{
     		// Maybe a response
     		try{
-    			int response = Integer.parseInt(pe.getMessage()); // inputs 1-9,0
-    			onPlayerResponse(player,response);
+    			onPlayerResponse(player,pe.getMessage());
     			
     			pe.setCancelled(true);
     			
@@ -93,19 +60,6 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     			// not for me
     		}
     	}
-    	
-    	// For testing
-    	if( pe.getMessage().equals("?") )
-    	{
-    		sendMenu(player,TestMenu);
-    		pe.setCancelled(true);
-    	}
-    	if( pe.getMessage().equals(">") )
-    	{
-    		sendMenu(player,TestValueMenu);
-    		pe.setCancelled(true);
-    	}
-    	// end testing
     }
     
     public void setClientMod(Player player, boolean enabled)
@@ -113,7 +67,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	playerClientMod.put(player, new Boolean(enabled));
     }
     
-    public void onPlayerResponse(Player player, int response)
+    public void onPlayerResponse(Player player, String response)
     {
     	MetaModMenu menu = null;
     	if( playerMenus.get(player) == null )
@@ -127,12 +81,9 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			
 		}
 		
-		//System.out.println("Player responded to Menu: \""+menu.title+"\" Page: " + page+ " With: \'"+response+"\'");
-    	
 		ResponseStatus handled = menu.handleResponse(player, response, page);
 		if( handled == ResponseStatus.NotHandled )
 		{
-			//System.out.println("Invalid Option " + (response));
 			player.sendMessage("Invalid Option " + (response));
 			// Resend menu?
 			MenuMetaModPlayerManager.sendMenu(player, menu, page);
@@ -142,7 +93,8 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			//System.out.println("HandledFinished");
 			if( playerMenus.get(player) != menu )
 			{
-				System.out.println("Hmmm... asynchronous / I dunno what order, but now the player has a new menu...");
+				if( MenuMetaMod.debug )
+					MenuMetaMod.log.info("Hmmm... asynchronous / I dunno what order, but now the player has a new menu...");
 			}
 			else
 			{
@@ -150,12 +102,6 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 				playerPage.remove(player);
 			}
 		}
-		/*// temp
-		else
-		{
-			System.out.println("Handled but not finished");
-		}
-		//*/
     }
 
     /**
