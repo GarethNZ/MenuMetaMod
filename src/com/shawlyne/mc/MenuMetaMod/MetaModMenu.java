@@ -29,7 +29,7 @@ public class MetaModMenu {
 		optionCount = this.options.length;
 		pages = 1;
 		
-		if( optionCount > 10 )
+		if( optionCount > 9 ) // 10 is exit / next page
 		{
 			int options = optionCount-9;
 			pages += (options/8);
@@ -83,6 +83,11 @@ public class MetaModMenu {
 				MenuMetaModPlayerManager.sendMenu(player, this, page-1);
 				return ResponseStatus.Handled;
 			}
+			else if( pages == page && response == 10)
+			{
+				// Cancel Menu
+				return ResponseStatus.Handled;
+			}
 			
 			if( page > 1 )
 			{
@@ -93,9 +98,21 @@ public class MetaModMenu {
 				return ResponseStatus.NotHandled;
 			else
 			{
-				if( MenuMetaMod.debug )
-					player.sendMessage("Performing command " + commands[optionOffset+response-1]);
-				player.performCommand( commands[optionOffset+response-1] );
+				// Accept Multiple Commands
+				String[] comArray = {commands[optionOffset+response-1]};
+				// Split Multiple Commands
+				if( commands[optionOffset+response-1].contains(";") )
+				{
+					comArray = commands[optionOffset+response-1].split(";");
+				}
+				
+				for(String command : comArray)
+				{
+					if( MenuMetaMod.debug )
+						player.sendMessage("Performing command " + command);
+					player.performCommand( command );
+				}
+				
 				return ResponseStatus.HandledFinished;
 			}
 		}

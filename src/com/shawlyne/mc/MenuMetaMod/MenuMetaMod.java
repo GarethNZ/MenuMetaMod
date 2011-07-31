@@ -63,11 +63,12 @@ public class MenuMetaMod extends JavaPlugin {
 		
 		if( config != null )
 		{
-			if( config.getKeys("debug") != null && config.getKeys("debug").size() > 0 )
+			// TODO:
+			/*if( config.getKeys("debug") != null && config.getKeys("debug").size() > 0 )
 			{
 				debug = true;
 				log.info("Debug mode enabled");
-			}
+			}*/
 			// Load in the values from the configuration file
 			List <String> menukeys = config.getKeys("menus");
 			if( menukeys != null )
@@ -87,8 +88,7 @@ public class MenuMetaMod extends JavaPlugin {
 						for(String option : options)
 						{
 							String optionCommand = menudata.getString("options."+option);
-							if( optionCommand.startsWith("/") ) // remove starting '/'
-								optionCommand = optionCommand.substring(1);
+							optionCommand = optionCommand.replaceAll("(;?)\\s*/", "$1"); // remove starting '/' (from potentially multiple commands
 							System.out.println("MenuItem: " + option + " - " + optionCommand);
 							commands.add(optionCommand);
 						}

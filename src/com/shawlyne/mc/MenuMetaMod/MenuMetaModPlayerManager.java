@@ -132,7 +132,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	if( page > menu.pages )
     		return false; // throw error?
     	
-    	int optionsToSend = menu.options.length+1;
+    	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
     	int firstOption = 0;
     	String startString = menu.title;
     	String endString = null;
@@ -148,12 +148,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			firstOption += ((page-2)*8); // not first 2 pages
 		}
     	
-    	if( menu.pages > 1 )
-    	{
-    		optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
-    	}
-    	
-    	// check not too many
+    	// check not too many optionsToSend
 		if( (menu.options.length - firstOption) < optionsToSend )
 		{
 			optionsToSend = menu.options.length - firstOption;
@@ -165,19 +160,22 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	{
     		player.sendMessage(optionText[o]+". "+menu.options[firstOption+o]);
     	}
-    	// Add next / prev
+    	// Add next / prev / Cancel
     	if( page > 1 )
 		{
 			// Add a 'prev page option'
-			//p.sendMessage(optionText[o]+". "+ChatColor.BLUE + "Prev Page");
-    		player.sendMessage("9. "+ChatColor.BLUE + "Prev Page");
+			player.sendMessage("9. "+ChatColor.BLUE + "Prev Page");
 			o++;
 		}
 		if( menu.pages > page )
 		{
 			// Add a 'next page option'
-			//p.sendMessage(optionText[o]+". "+ChatColor.BLUE + "Next Page");
 			player.sendMessage("0. "+ChatColor.BLUE + "Next Page");
+		}
+		if( menu.pages == page )
+		{
+			// Add an 'Exit page option'
+			player.sendMessage("0. "+ChatColor.BLUE + "Cancel");
 		}
 		
 		if( endString != null)
