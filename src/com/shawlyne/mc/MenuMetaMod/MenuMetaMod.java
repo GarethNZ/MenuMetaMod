@@ -14,11 +14,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
 
 /**
  * MenuMetaMod for Bukkit
@@ -27,6 +31,8 @@ import org.bukkit.util.config.ConfigurationNode;
  */
 public class MenuMetaMod extends JavaPlugin {
     private final static MenuMetaModPlayerManager playerManager = new MenuMetaModPlayerManager();
+	public static MenuMetaMod plugin;
+	
     public static boolean debug = false;
     public static Logger log;
     Configuration config;
@@ -36,6 +42,7 @@ public class MenuMetaMod extends JavaPlugin {
     
     public MenuMetaMod()
     {
+    	plugin = this;
     	log = Logger.getLogger("Minecraft");
     	
     }
@@ -133,6 +140,8 @@ public class MenuMetaMod extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
        
         pm.registerEvent(Event.Type.PLAYER_CHAT, playerManager, Priority.Monitor, this);
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, new MenuInputListener(), Event.Priority.Low, this);
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, new MenuScreenListener(), Event.Priority.Low, this);
 
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );
@@ -146,35 +155,7 @@ public class MenuMetaMod extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command,
 			String commandLabel, String[] args) {
     		
-    		if (command.getName().equalsIgnoreCase("menu") )
-    		{
-    			if( !(sender instanceof Player) )
-    	    		return false;
-    			Player player = (Player)sender;
-    		
-    			if( args.length >= 1)
-    			{
-    				if( args[0].equalsIgnoreCase("modinstalled") )
-    				{
-		    			playerManager.setClientMod(player,true);
-		    			player.sendMessage(ChatColor.AQUA+" MenuMod detected");
-		    			return true;
-    				}
-    				// Possible page response
-    				try{
-    					playerManager.onPlayerResponse(player, args[0]);
-    					
-    					return true;
-		    		}
-		    		catch(NumberFormatException e)
-		    		{
-		    			
-		    		} 
-		    		
-    			}    			
-    			player.sendMessage("Error in command format. Should be /menu <integer>");
-    		}
-    		else if( command.getName().equalsIgnoreCase("qm") )
+    		if( command.getName().equalsIgnoreCase("qm") )
     		{
     			if( !(sender instanceof Player) )
     	    		return false;
@@ -184,7 +165,10 @@ public class MenuMetaMod extends JavaPlugin {
     			{
     				MetaModMenu menu = configuredMenus.get(args[0]);
     				if( menu == null )
+    				{
+    					System.out.println("Error no menu configured for : \""+ args[0]+"\"");
     					return false;
+    				}
     				MenuMetaModPlayerManager.sendMenu(player, menu);
     				return true;
     			}

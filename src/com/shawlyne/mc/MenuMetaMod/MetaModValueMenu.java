@@ -42,13 +42,13 @@ public class MetaModValueMenu extends MetaModMenu {
 			if( pages > page && response == 10 )
 			{
 				// Next page
-				MenuMetaModPlayerManager.sendMenu(player, this, page+1);
+				sendPage(player, page+1);
 				return ResponseStatus.Handled;
 			}
 			else if( page > 1 && response == 9)
 			{
 				// Prev page
-				MenuMetaModPlayerManager.sendMenu(player, this, page-1);
+				sendPage(player, page-1);
 				return ResponseStatus.Handled;
 			}
 			
@@ -61,9 +61,9 @@ public class MetaModValueMenu extends MetaModMenu {
 				return ResponseStatus.NotHandled;
 			else
 			{
-				if( MenuMetaModPlayerManager.playerClientMod.get(player) != null )
+				/*if( MenuMetaModPlayerManager.playerClientMod.get(player) != null )
 					player.sendMessage("##Value_" + valueQuestion);
-				else
+				else*/
 					player.sendMessage(valueQuestion);
 				valuesPending.put(player, commands[optionOffset+response-1]);
 				return ResponseStatus.Handled;

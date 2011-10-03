@@ -2,18 +2,24 @@ package com.shawlyne.mc.MenuMetaMod;
 
 import java.util.Date;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class MetaModMenu {
+	protected static String[] optionText = { // So index 0 shows "1" etc
+		"1","2","3","4","5",
+		"6","7","8","9","0"						    
+	};
 	
 	
 	public String title;
 	public String[] options;// text
 	public String[] commands; // result
-	private long sendTime; // used for timeout
+	protected long sendTime; // used for timeout
 	
 	public int pages;
 	public int optionCount;
+	protected int page;
 	
 	public MetaModMenu(String t, String[] o, String[] c){// throws Exception {
 		title = t;
@@ -36,11 +42,6 @@ public class MetaModMenu {
 			if( options % 8 != 0 )
 				pages++;
 		}
-		
-		//if( options.length != commands.length )
-		//	throw new Exception("Array size lengths not equal");
-		
-		this.sendTime = new Date().getTime();
 	}
 	
 	
@@ -61,8 +62,56 @@ public class MetaModMenu {
 			return false;
 	}
 	
+	public boolean sendPage(Player player, int p)
+	{
+		page = p;
+    	if( page > pages )
+    		return false; // throw error?
+    	
+    	int firstOption = 0;
+    		
+    	if( page > 1 )
+		{
+			firstOption = 9;
+			firstOption += ((page-2)*8); // not first 2 pages
+		}
+    	
+    	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
+    	// check not too many optionsToSend
+		if( (options.length - firstOption) < optionsToSend )
+		{
+			optionsToSend = options.length - firstOption;
+		}
+    	
+    	player.sendMessage(title);
+    	int o = 0;
+    	for(; o < optionsToSend ; o++)
+    	{
+    		player.sendMessage(optionText[o]+". "+options[firstOption+o]);
+    	}
+    	// Add next / prev / Cancel
+    	if( page > 1 )
+		{
+			// Add a 'prev page option'
+			player.sendMessage("9. "+ChatColor.BLUE + "Prev Page");
+			o++;
+		}
+		if( pages > page )
+		{
+			// Add a 'next page option'
+			player.sendMessage("0. "+ChatColor.BLUE + "Next Page");
+		}
+		if( pages == page )
+		{
+			// Add an 'Exit page option'
+			player.sendMessage("0. "+ChatColor.BLUE + "Cancel");
+		}
+		
+		return true;
+	}
+	
 	// Expected Response: 1-9,0
-	public ResponseStatus handleResponse(Player player, String r, int page) // 1 - 10
+	public ResponseStatus handleResponse(Player player, String r) // 1 - 10
 	{
 		int optionOffset = 0;
 		if( isNumber(r) )
@@ -74,13 +123,13 @@ public class MetaModMenu {
 			if( pages > page && response == 10 )
 			{
 				// Next page
-				MenuMetaModPlayerManager.sendMenu(player, this, page+1);
+				sendPage(player, page+1);
 				return ResponseStatus.Handled;
 			}
 			else if( page > 1 && response == 9)
 			{
 				// Prev page
-				MenuMetaModPlayerManager.sendMenu(player, this, page-1);
+				sendPage(player, page-1);
 				return ResponseStatus.Handled;
 			}
 			else if( pages == page && response == 10)
@@ -94,7 +143,7 @@ public class MetaModMenu {
 				optionOffset = 9;
 				optionOffset += ((page-2)*8); // not first two
 			}
-			if( commands.length < (optionOffset+response-1) )
+			if( commands.length < (optionOffset+response) )
 				return ResponseStatus.NotHandled;
 			else
 			{
@@ -121,7 +170,12 @@ public class MetaModMenu {
 	
 	
 	// helper for the responses
-    public static boolean isNumber(String s)
+	public static boolean isNumber(char c)
+	{
+		return '0' >= c && c <= '9';
+	}
+
+	public static boolean isNumber(String s)
 	{
 		return s.matches("[0-9]+");
 	}

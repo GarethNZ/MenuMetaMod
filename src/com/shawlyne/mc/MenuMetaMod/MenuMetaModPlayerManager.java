@@ -6,6 +6,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
 
 /**
  * Handle events for all Player related events
@@ -28,8 +31,8 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 	};
 
 	public static HashMap<Player,MetaModMenu> playerMenus = new HashMap<Player,MetaModMenu>();
-	public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
-	public static HashMap<Player,Boolean> playerClientMod = new HashMap<Player,Boolean>();
+	//public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
+	//public static HashMap<Player,Boolean> playerClientMod = new HashMap<Player,Boolean>();
 	
     
     /**
@@ -62,31 +65,32 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     	}
     }
     
-    public void setClientMod(Player player, boolean enabled)
+    /*public void setClientMod(Player player, boolean enabled)
     {
     	playerClientMod.put(player, new Boolean(enabled));
-    }
+    }*/
     
-    public void onPlayerResponse(Player player, String response)
+    public static void onPlayerResponse(Player player, String response)
     {
     	MetaModMenu menu = null;
     	if( playerMenus.get(player) == null )
     		return;
     	menu = playerMenus.get(player);
     	
-    	int page = 1;
+    	/*int page = 1;
 		if( playerPage.get(player) != null )
 		{
 			page = playerPage.get(player).intValue();
 			
-		}
+		}*/
 		
-		ResponseStatus handled = menu.handleResponse(player, response, page);
+		ResponseStatus handled = menu.handleResponse(player, response);
 		if( handled == ResponseStatus.NotHandled )
 		{
 			player.sendMessage("Invalid Option " + (response));
 			// Resend menu?
-			MenuMetaModPlayerManager.sendMenu(player, menu, page);
+			menu.sendPage(player, menu.page);
+			//MenuMetaModPlayerManager.sendMenu(player, menu, page);
 		}
 		else if( handled == ResponseStatus.HandledFinished)
 		{
@@ -99,7 +103,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			else
 			{
 				playerMenus.remove(player); // menu finished
-				playerPage.remove(player);
+				//playerPage.remove(player);
 			}
 		}
     }
@@ -108,84 +112,29 @@ public class MenuMetaModPlayerManager extends PlayerListener {
      * Sends a menu to a player
      * @param p - Player to send to 
      * @param menu - MetaModMenu to send 
+     * @return sent successfully or not
      */
-    public static void sendMenu(Player p, MetaModMenu menu)
+    public static boolean sendMenu(Player player, MetaModMenu menu)
     {
-    	sendMenu(p, menu, 1);
+    	if( player instanceof SpoutPlayer )
+    	{ // TEMP FORCE to be ClientMenu
+    		ClientMenu cMenu = new ClientMenu(menu.title, menu.options, menu.commands);
+    		System.out.println("Sending a ClientMenu");
+    		playerMenus.put(player, cMenu);
+	    	//playerPage.put(player, Integer.valueOf(page));
+	    	return cMenu.sendPage((SpoutPlayer)player, 0);
+    	}
+    	else
+    	{
+	    	playerMenus.put(player, menu);
+	    	//playerPage.put(player, Integer.valueOf(page));
+	    	return menu.sendPage(player, 0);
+    	}
     }
     
-    /**
-     * Sends a page of a menu to a player
-     * @param p - Player to send to 
-     * @param menu - MetaModMenu to send 
-     * @param page - int Page number 1+
-     * @return sent successfully
-     */
-    public static boolean sendMenu(Player player, MetaModMenu menu, int page)
-    {
-    	// Num. <OptionText>
-    	// order is 1-9, 0
-    	
-    	playerMenus.put(player, menu);
-    	playerPage.put(player, Integer.valueOf(page));
-    	
-    	if( page > menu.pages )
-    		return false; // throw error?
-    	
-    	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
-    	int firstOption = 0;
-    	String startString = menu.title;
-    	String endString = null;
-		if( MenuMetaModPlayerManager.playerClientMod.get(player) != null )
-		{
-			startString = "##Menu_"+startString;
-			endString = "##EndMenu";
-		}
-			
-    	if( page > 1 )
-		{
-			firstOption = 9;
-			firstOption += ((page-2)*8); // not first 2 pages
-		}
-    	
-    	// check not too many optionsToSend
-		if( (menu.options.length - firstOption) < optionsToSend )
-		{
-			optionsToSend = menu.options.length - firstOption;
-		}
-    	
-    	player.sendMessage(startString);
-    	int o = 0;
-    	for(; o < optionsToSend ; o++)
-    	{
-    		player.sendMessage(optionText[o]+". "+menu.options[firstOption+o]);
-    	}
-    	// Add next / prev / Cancel
-    	if( page > 1 )
-		{
-			// Add a 'prev page option'
-			player.sendMessage("9. "+ChatColor.BLUE + "Prev Page");
-			o++;
-		}
-		if( menu.pages > page )
-		{
-			// Add a 'next page option'
-			player.sendMessage("0. "+ChatColor.BLUE + "Next Page");
-		}
-		if( menu.pages == page )
-		{
-			// Add an 'Exit page option'
-			player.sendMessage("0. "+ChatColor.BLUE + "Cancel");
-		}
-		
-		if( endString != null)
-			player.sendMessage(endString);
-    	return true;
-    }
-
 	public static void empty() {
 		playerMenus.clear();
-		playerPage.clear();
+		//playerPage.clear();
 		// Dont clear playerClientMod
 	}
 }
