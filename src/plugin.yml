@@ -2,12 +2,9 @@ name: MenuMetaMod
 
 main: com.shawlyne.mc.MenuMetaMod.MenuMetaMod
 
-version: 0.7
+version: 0.8
 
 commands:
-    menu:
-        description: Player specific menu response commands
-        usage: /menu
     qm:
         description: Quick launch config specified menus
         usage: /qm [Menu.command from config file]

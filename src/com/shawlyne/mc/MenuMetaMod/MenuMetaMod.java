@@ -61,7 +61,7 @@ public class MenuMetaMod extends JavaPlugin {
 			try {
 				yml.createNewFile();
 				log.info("Created an empty file " + getDataFolder() +"/config.yml, please edit it!");
-				config.setProperty("toughblocks", null);
+				config.setProperty("debug", false);
 				config.save();
 			} catch (IOException ex){
 				log.warning(getDescription().getName() + ": could not generate config.yml. Are the file permissions OK?");
@@ -70,12 +70,11 @@ public class MenuMetaMod extends JavaPlugin {
 		
 		if( config != null )
 		{
-			// TODO:
-			/*if( config.getKeys("debug") != null && config.getKeys("debug").size() > 0 )
+			debug = config.getBoolean("debug",false);
+			if( debug )
 			{
-				debug = true;
-				log.info("Debug mode enabled");
-			}*/
+				log.log(Level.CONFIG, "[MenuMetaMod] Debug mode enabled");
+			}
 			// Load in the values from the configuration file
 			List <String> menukeys = config.getKeys("menus");
 			if( menukeys != null )
@@ -96,7 +95,8 @@ public class MenuMetaMod extends JavaPlugin {
 						{
 							String optionCommand = menudata.getString("options."+option);
 							optionCommand = optionCommand.replaceAll("(;?)\\s*/", "$1"); // remove starting '/' (from potentially multiple commands
-							System.out.println("MenuItem: " + option + " - " + optionCommand);
+							if( debug )
+								System.out.println("[MenuMetaMod] MenuItem: " + option + " - " + optionCommand);
 							commands.add(optionCommand);
 						}
 						String[] opts = new String[1];
@@ -108,7 +108,8 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModMenu menu = new MetaModMenu(title, opts, comms);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
+							if( debug )
+								log.log(Level.INFO, "[MenuMetaMod] Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
 						}
 						else if( type.equalsIgnoreCase("ValueMenu") )
 						{
@@ -116,11 +117,12 @@ public class MenuMetaMod extends JavaPlugin {
 							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
-							log.log(Level.INFO, "Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
+							if( debug )
+								log.log(Level.INFO, "[MenuMetaMod] Menu " + title + " added, it will respond to the command '/qm "+ command+"'");
 						}
 						else
 						{
-							log.log(Level.WARNING, "Unknown menu type: " + type +". Menu " + title + " not added");
+							log.log(Level.WARNING, "[MenuMetaMod] Unknown menu type: " + type +". Menu " + title + " not added");
 						}
 						// TODO: Investigate programatically adding more commands to listen to
 						// PluginDescriptionFile wangleDescription = new PluginDescriptionFile("MenuMetaMod", "0.4", "com.shawlyne.mc.MenuMetaMod.MenuMetaMod");
@@ -132,7 +134,7 @@ public class MenuMetaMod extends JavaPlugin {
 			
 		}
 		else
-			log.log(Level.WARNING, "Error accessing Config");
+			log.log(Level.WARNING, "[MenuMetaMod] Error accessing Config");
 
 		
 		
@@ -166,7 +168,7 @@ public class MenuMetaMod extends JavaPlugin {
     				MetaModMenu menu = configuredMenus.get(args[0]);
     				if( menu == null )
     				{
-    					System.out.println("Error no menu configured for : \""+ args[0]+"\"");
+    					System.out.println("[MenuMetaMod] Error no menu configured for : \""+ args[0]+"\"");
     					return false;
     				}
     				MenuMetaModPlayerManager.sendMenu(player, menu);
