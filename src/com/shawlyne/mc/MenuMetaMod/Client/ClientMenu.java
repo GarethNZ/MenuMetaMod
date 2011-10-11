@@ -2,57 +2,38 @@ package com.shawlyne.mc.MenuMetaMod.Client;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.getspout.spoutapi.gui.InGameHUD;
 import org.getspout.spoutapi.player.SpoutPlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
-import org.getspout.spoutapi.gui.GenericButton;
 import org.getspout.spoutapi.gui.GenericLabel;
 import org.getspout.spoutapi.gui.GenericPopup;
 import org.getspout.spoutapi.gui.GenericTexture;
-import org.getspout.spoutapi.gui.InGameHUD;
-import org.getspout.spoutapi.gui.InGameScreen;
-import org.getspout.spoutapi.gui.RenderPriority;
 import org.getspout.spoutapi.gui.Widget;
-import org.getspout.spoutapi.gui.WidgetAnchor;
-import org.getspout.spoutapi.keyboard.Keyboard;
-import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.shawlyne.mc.MenuMetaMod.MenuMetaMod;
-import com.shawlyne.mc.MenuMetaMod.MenuMetaModPlayerManager;
 import com.shawlyne.mc.MenuMetaMod.MetaModMenu;
 import com.shawlyne.mc.MenuMetaMod.ResponseStatus;
 
 public class ClientMenu extends MetaModMenu  {
-	
-	//InGameScreen clientScreen;
-	//int playerId;
-	//
 	public GenericTexture bgImage = null;
 	public ArrayList<Widget> widgets = new ArrayList<Widget>();
 	public GenericLabel menuTitle = null;
+	
+	
 	
 	public ClientMenu(String t, String[] o, String[] c){// throws Exception {
 		super(t,o,c);
 	}
 
 	
-	public boolean sendPage(SpoutPlayer player, int p)
+	public boolean sendPage(Player p, int pg)
 	{
+		SpoutPlayer player = (SpoutPlayer)p;
 		InGameHUD main = player.getMainScreen();
 		GenericPopup popup = new GenericPopup();
-		page = p;
+		page = pg+1; // 0 --> Page 1 etc
 		widgets.clear();
 
 		if( main.getActivePopup() != null )
@@ -126,6 +107,7 @@ public class ClientMenu extends MetaModMenu  {
 			inputOption.setX(20);
 			inputOption.setY(20 * (o + 2));
 			widgets.add(inputOption);
+			System.out.println(pages + " > " + page + " - NextPage button added");
 		}
 		if( pages == page )
 		{
@@ -136,6 +118,7 @@ public class ClientMenu extends MetaModMenu  {
 			inputOption.setX(20);
 			inputOption.setY(20 * (o + 2));
 			widgets.add(inputOption);
+			System.out.println(pages + " == " + page + " - Cancel button added");
 		}
 		
 		for (Widget widget : widgets) {
@@ -148,17 +131,14 @@ public class ClientMenu extends MetaModMenu  {
 		
 	}
 
-	public ResponseStatus handleResponse(SpoutPlayer player, Keyboard k)
+	/**
+	 * Override normal menu's handleResponse
+	 */
+	public ResponseStatus handleResponse(Player p, String r) // 1 - 10
 	{
-		String response = k.toString().replaceAll("KEY_", "");
-		//System.out.println("Got KB response: " + response);
-		return handleResponse(player,response);
-	}
-	
-	public ResponseStatus handleResponse(SpoutPlayer player, String r) // 1 - 10
-	{
+		SpoutPlayer player = (SpoutPlayer)p;
 		int optionOffset = 0;
-		
+		System.out.println("[ClientMenu] handleResponse " + r);
 		if( isNumber(r) ) // 'Valid response'
 		{
 			// Close the popup
@@ -166,6 +146,8 @@ public class ClientMenu extends MetaModMenu  {
 			if( main.getActivePopup() != null )
 			{
 				main.closePopup();
+				System.out.println("[ClientMenu] close popup " + r);
+				
 			}
 			else
 				return ResponseStatus.NotHandled; // No menu to handle (WTF)
@@ -190,7 +172,7 @@ public class ClientMenu extends MetaModMenu  {
 			else if( pages == page && response == 10)
 			{
 				// Cancel Menu
-				return ResponseStatus.Handled;
+				return ResponseStatus.HandledFinished;
 			}
 			
 			if( page > 1 )
@@ -228,7 +210,7 @@ public class ClientMenu extends MetaModMenu  {
 	 * TODO: remove? not used anyway
 	 * NOTE: Chat menu fades after ~8s. But still visible in player's chat log
 	 */
-	public boolean isExpired()
+	private boolean isExpired()
 	{
 		long now = new Date().getTime();
 		now -= 30000; // 30s

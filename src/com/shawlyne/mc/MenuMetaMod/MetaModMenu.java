@@ -42,6 +42,7 @@ public class MetaModMenu {
 			if( options % 8 != 0 )
 				pages++;
 		}
+		System.out.println(pages + " pages from " + this.options.length + " options");
 	}
 	
 	
@@ -52,7 +53,7 @@ public class MetaModMenu {
 	 * TODO: remove? not used anyway
 	 * NOTE: Chat menu fades after ~8s. But still visible in player's chat log
 	 */
-	public boolean isExpired()
+	private boolean isExpired()
 	{
 		long now = new Date().getTime();
 		now -= 30000; // 30s
@@ -64,7 +65,7 @@ public class MetaModMenu {
 	
 	public boolean sendPage(Player player, int p)
 	{
-		page = p;
+		page = p+1; // 0 --> Page 1 etc
     	if( page > pages )
     		return false; // throw error?
     	
@@ -135,7 +136,7 @@ public class MetaModMenu {
 			else if( pages == page && response == 10)
 			{
 				// Cancel Menu
-				return ResponseStatus.Handled;
+				return ResponseStatus.HandledFinished;
 			}
 			
 			if( page > 1 )
@@ -178,6 +179,11 @@ public class MetaModMenu {
 	public static boolean isNumber(String s)
 	{
 		return s.matches("[0-9]+");
+	}
+	
+	public int getPage()
+	{
+		return page-1; // 'Page 1' --> index 0
 	}
     
 

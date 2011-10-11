@@ -1,5 +1,6 @@
 package com.shawlyne.mc.MenuMetaMod;
 
+// TODO: No idea how to make spout (server side) OPTIONAL
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,21 +9,16 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.config.Configuration;
 import org.bukkit.util.config.ConfigurationNode;
-import org.getspout.spoutapi.player.SpoutPlayer;
-
-import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
 
 /**
  * MenuMetaMod for Bukkit
@@ -37,8 +33,10 @@ public class MenuMetaMod extends JavaPlugin {
     public static Logger log;
     Configuration config;
     // Menus accessible by "/quick <String>"
-    HashMap<String,MetaModMenu> configuredMenus = new HashMap<String,MetaModMenu>(); // command,menu
-    MetaModMenu quickMenu; // default menu that responds to "/quick" 
+    static HashMap<String,MetaModMenu> configuredMenus = new HashMap<String,MetaModMenu>(); // command,menu
+    static MetaModMenu quickMenu; // default menu that responds to "/quick"
+    
+    // Spout only
     
     public MenuMetaMod()
     {

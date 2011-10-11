@@ -2,10 +2,10 @@ package com.shawlyne.mc.MenuMetaMod;
 
 import java.util.HashMap;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.getspout.spoutapi.keyboard.Keyboard;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
@@ -25,10 +25,6 @@ import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
  *  Prev Page is always option 9
  */
 public class MenuMetaModPlayerManager extends PlayerListener {
-	private static String[] optionText = {
-		"1","2","3","4","5",
-		"6","7","8","9","0"						    
-	};
 
 	public static HashMap<Player,MetaModMenu> playerMenus = new HashMap<Player,MetaModMenu>();
 	//public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
@@ -84,28 +80,45 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			
 		}*/
 		
-		ResponseStatus handled = menu.handleResponse(player, response);
+		ResponseStatus handled;
+		if( menu instanceof ClientMenu )
+			handled = ((ClientMenu)menu).handleResponse(player, response);
+		else
+			handled = menu.handleResponse(player, response);
+		
 		if( handled == ResponseStatus.NotHandled )
 		{
 			player.sendMessage("Invalid Option " + (response));
 			// Resend menu?
-			menu.sendPage(player, menu.page);
+			menu.sendPage(player, menu.getPage());
 			//MenuMetaModPlayerManager.sendMenu(player, menu, page);
 		}
 		else if( handled == ResponseStatus.HandledFinished)
 		{
-			//System.out.println("HandledFinished");
 			if( playerMenus.get(player) != menu )
 			{
+				// A new command must have changed the menu
+				// Hopefully this is the correct behaviour
 				if( MenuMetaMod.debug )
 					MenuMetaMod.log.info("Hmmm... asynchronous / I dunno what order, but now the player has a new menu...");
 			}
 			else
 			{
 				playerMenus.remove(player); // menu finished
-				//playerPage.remove(player);
 			}
 		}
+    }
+    
+    /**
+     * Only used for SpoutCraft players (where Key events are sent)
+     * @param player
+     * @param response
+     */
+    public static void onPlayerKeyResponse(SpoutPlayer player, Keyboard k)
+    {
+    	String response = k.toString().replaceAll("KEY_", "");
+		//System.out.println("Got KB response: " + response);
+		onPlayerResponse(player,response);
     }
 
     /**
@@ -117,19 +130,19 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     public static boolean sendMenu(Player player, MetaModMenu menu)
     {
     	if( player instanceof SpoutPlayer )
-    	{ // TEMP FORCE to be ClientMenu
-    		ClientMenu cMenu = new ClientMenu(menu.title, menu.options, menu.commands);
-    		System.out.println("Sending a ClientMenu");
-    		playerMenus.put(player, cMenu);
-	    	//playerPage.put(player, Integer.valueOf(page));
-	    	return cMenu.sendPage((SpoutPlayer)player, 0);
+    	{ 
+    		SpoutPlayer sp = (SpoutPlayer)player;
+    		if( sp.isSpoutCraftEnabled() && !(menu instanceof ClientMenu) )
+    		{
+	    		ClientMenu cMenu = new ClientMenu(menu.title, menu.options, menu.commands);
+	    		System.out.println("Sending a ClientMenu");
+	    		playerMenus.put(player, cMenu);
+		    	return cMenu.sendPage((SpoutPlayer)player, 0);
+    		}
     	}
-    	else
-    	{
-	    	playerMenus.put(player, menu);
-	    	//playerPage.put(player, Integer.valueOf(page));
-	    	return menu.sendPage(player, 0);
-    	}
+    	
+    	playerMenus.put(player, menu);
+	    return menu.sendPage(player, 0);
     }
     
 	public static void empty() {

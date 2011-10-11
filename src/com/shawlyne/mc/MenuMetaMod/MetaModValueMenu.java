@@ -51,6 +51,11 @@ public class MetaModValueMenu extends MetaModMenu {
 				sendPage(player, page-1);
 				return ResponseStatus.Handled;
 			}
+			else if( pages == page && response == 10)
+			{
+				// Cancel Menu
+				return ResponseStatus.HandledFinished;
+			}
 			
 			if( page > 1 )
 			{
