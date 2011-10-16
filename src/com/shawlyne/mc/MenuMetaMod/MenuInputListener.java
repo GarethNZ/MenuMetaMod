@@ -3,7 +3,10 @@ package com.shawlyne.mc.MenuMetaMod;
 
 import org.getspout.spoutapi.event.input.InputListener;
 import org.getspout.spoutapi.event.input.KeyReleasedEvent;
+import org.getspout.spoutapi.gui.ScreenType;
+import org.getspout.spoutapi.gui.Widget;
 import org.getspout.spoutapi.keyboard.Keyboard;
+import org.getspout.spoutapi.player.SpoutPlayer;
 
 public class MenuInputListener extends InputListener
 {
@@ -21,8 +24,13 @@ public class MenuInputListener extends InputListener
 		}
 		else if( event.getKey() == Keyboard.KEY_K ) {
 			// Send default quick menu
-			System.out.println("[K Pushed] Sending quick menu");
-			MenuMetaModPlayerManager.sendMenu(event.getPlayer(), MenuMetaMod.quickMenu);
+			//System.out.println("[K Pushed] Sending quick menu");
+			// Check if a popup is open
+			SpoutPlayer player = (SpoutPlayer)event.getPlayer();
+			if( player.getActiveScreen() == ScreenType.GAME_SCREEN ) // No other screens active
+			{
+				MenuMetaModPlayerManager.sendMenu(event.getPlayer(), MenuMetaMod.quickMenu);
+			}
 		}
 			
 	}
