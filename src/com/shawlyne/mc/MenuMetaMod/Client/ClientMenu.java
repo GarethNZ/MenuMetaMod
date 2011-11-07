@@ -210,7 +210,7 @@ public class ClientMenu extends MetaModMenu  {
 	 * TODO: remove? not used anyway
 	 * NOTE: Chat menu fades after ~8s. But still visible in player's chat log
 	 */
-	private boolean isExpired()
+	/*private boolean isExpired()
 	{
 		long now = new Date().getTime();
 		now -= 30000; // 30s
@@ -218,5 +218,5 @@ public class ClientMenu extends MetaModMenu  {
 			return true;
 		else
 			return false;
-	}
+	}*/
 }

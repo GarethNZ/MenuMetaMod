@@ -1,7 +1,5 @@
 package com.shawlyne.mc.MenuMetaMod;
 
-import java.util.Date;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -53,7 +51,7 @@ public class MetaModMenu {
 	 * TODO: remove? not used anyway
 	 * NOTE: Chat menu fades after ~8s. But still visible in player's chat log
 	 */
-	private boolean isExpired()
+	/*private boolean isExpired()
 	{
 		long now = new Date().getTime();
 		now -= 30000; // 30s
@@ -61,7 +59,7 @@ public class MetaModMenu {
 			return true;
 		else
 			return false;
-	}
+	}*/
 	
 	public boolean sendPage(Player player, int p)
 	{
