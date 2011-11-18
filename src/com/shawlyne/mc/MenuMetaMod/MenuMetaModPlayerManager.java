@@ -9,6 +9,7 @@ import org.getspout.spoutapi.keyboard.Keyboard;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
+import com.shawlyne.mc.MenuMetaMod.Client.ClientValueMenu;
 
 /**
  * Handle events for all Player related events
@@ -26,7 +27,7 @@ import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
  */
 public class MenuMetaModPlayerManager extends PlayerListener {
 
-	public static HashMap<Player,MetaModMenu> playerMenus = new HashMap<Player,MetaModMenu>();
+	public static HashMap<Player,Menu> playerMenus = new HashMap<Player,Menu>();
 	//public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
 	//public static HashMap<Player,Boolean> playerClientMod = new HashMap<Player,Boolean>();
 	
@@ -68,7 +69,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     
     public static void onPlayerResponse(Player player, String response)
     {
-    	MetaModMenu menu = null;
+    	Menu menu = null;
     	if( playerMenus.get(player) == null )
     		return;
     	menu = playerMenus.get(player);
@@ -127,15 +128,22 @@ public class MenuMetaModPlayerManager extends PlayerListener {
      * @param menu - MetaModMenu to send 
      * @return sent successfully or not
      */
-    public static boolean sendMenu(Player player, MetaModMenu menu)
+    public static boolean sendMenu(Player player, Menu menu)
     {
-    	if( player instanceof SpoutPlayer )
+    	if( player instanceof SpoutPlayer && ((SpoutPlayer)player).isSpoutCraftEnabled())
     	{ 
     		SpoutPlayer sp = (SpoutPlayer)player;
-    		if( sp.isSpoutCraftEnabled() && !(menu instanceof ClientMenu) )
+    		if( (menu instanceof Menu) )
     		{
 	    		ClientMenu cMenu = new ClientMenu(menu.title, menu.options, menu.commands);
-	    		System.out.println("Sending a ClientMenu");
+	    		System.out.println("Sending a ClientMenu instead of MetaModMenu");
+	    		playerMenus.put(player, cMenu);
+		    	return cMenu.sendPage((SpoutPlayer)player, 0);
+    		}
+    		else if( (menu instanceof ValueMenu) )
+    		{
+    			ClientValueMenu cMenu = new ClientValueMenu(menu.title, menu.options, menu.commands, ((ValueMenu)menu).valueQuestion);
+	    		System.out.println("Sending a ClientValueMenu instead of MetaModValueMenu");
 	    		playerMenus.put(player, cMenu);
 		    	return cMenu.sendPage((SpoutPlayer)player, 0);
     		}

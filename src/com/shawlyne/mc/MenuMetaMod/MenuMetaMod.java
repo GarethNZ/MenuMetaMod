@@ -33,8 +33,8 @@ public class MenuMetaMod extends JavaPlugin {
     public static Logger log;
     Configuration config;
     // Menus accessible by "/quick <String>"
-    static HashMap<String,MetaModMenu> configuredMenus = new HashMap<String,MetaModMenu>(); // command,menu
-    static MetaModMenu quickMenu; // default menu that responds to "/quick"
+    static HashMap<String,Menu> configuredMenus = new HashMap<String,Menu>(); // command,menu
+    static Menu quickMenu; // default menu that responds to "/quick"
     
     // Spout only
     
@@ -103,7 +103,7 @@ public class MenuMetaMod extends JavaPlugin {
 						comms = commands.toArray(comms);
 						if( type.equalsIgnoreCase("Menu") )
 						{
-							MetaModMenu menu = new MetaModMenu(title, opts, comms);
+							Menu menu = new Menu(title, opts, comms);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
 							if( debug )
@@ -112,7 +112,7 @@ public class MenuMetaMod extends JavaPlugin {
 						else if( type.equalsIgnoreCase("ValueMenu") )
 						{
 							String question = menudata.getString("question");
-							MetaModValueMenu menu = new MetaModValueMenu(title, opts, comms, question);
+							ValueMenu menu = new ValueMenu(title, opts, comms, question);
 							if( quickMenu == null ) quickMenu = menu;
 							configuredMenus.put(command, menu);
 							if( debug )
@@ -163,7 +163,7 @@ public class MenuMetaMod extends JavaPlugin {
     		
     			if( args.length == 1)
     			{
-    				MetaModMenu menu = configuredMenus.get(args[0]);
+    				Menu menu = configuredMenus.get(args[0]);
     				if( menu == null )
     				{
     					System.out.println("[MenuMetaMod] Error no menu configured for : \""+ args[0]+"\"");
@@ -190,7 +190,7 @@ public class MenuMetaMod extends JavaPlugin {
      * @param p - Player to send to
      * @param menu - The MetaModMenu to show 
      */
-    public static void sendMenu(Player p, MetaModMenu menu)
+    public static void sendMenu(Player p, Menu menu)
     {
     	MenuMetaModPlayerManager.sendMenu(p, menu);
     }

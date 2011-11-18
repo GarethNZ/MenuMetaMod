@@ -1,0 +1,10 @@
+name: MenuMetaMod
+
+main: com.shawlyne.mc.MenuMetaMod.MenuMetaMod
+
+version: 1.0
+
+commands:
+    qm:
+        description: Quick launch config specified menus
+        usage: /qm [Menu.command from config file]

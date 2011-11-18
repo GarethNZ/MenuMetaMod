@@ -13,10 +13,10 @@ import org.getspout.spoutapi.gui.GenericTexture;
 import org.getspout.spoutapi.gui.Widget;
 
 import com.shawlyne.mc.MenuMetaMod.MenuMetaMod;
-import com.shawlyne.mc.MenuMetaMod.MetaModMenu;
+import com.shawlyne.mc.MenuMetaMod.Menu;
 import com.shawlyne.mc.MenuMetaMod.ResponseStatus;
 
-public class ClientMenu extends MetaModMenu  {
+public class ClientMenu extends Menu  {
 	public GenericTexture bgImage = null;
 	public ArrayList<Widget> widgets = new ArrayList<Widget>();
 	public GenericLabel menuTitle = null;
@@ -71,9 +71,9 @@ public class ClientMenu extends MetaModMenu  {
     	
     	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
     	// check not too many optionsToSend
-		if( (options.length - firstOption) < optionsToSend )
+		if( (optionCount - firstOption) < optionsToSend )
 		{
-			optionsToSend = options.length - firstOption;
+			optionsToSend = optionCount - firstOption;
 		}
     	
     	int o = 0;
@@ -194,6 +194,7 @@ public class ClientMenu extends MetaModMenu  {
 				
 				for(String command : comArray)
 				{
+					command = getCommand(player, command);
 					if( MenuMetaMod.debug )
 						player.sendMessage("Performing command " + command);
 					player.performCommand( command );

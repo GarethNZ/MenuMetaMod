@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 
-public class MetaModValueMenu extends MetaModMenu {
-	static HashMap<Player,String> valuesPending = new HashMap<Player,String>(); // Store player + command which we will append the value to
+public class ValueMenu extends Menu {
+	static HashMap<Player,String[]> valuesPending = new HashMap<Player,String[]>(); // Store player + command which we will append the value to
 	
-	private String valueQuestion;
-	public MetaModValueMenu(String title, String[] options, String[] commands, String vQuestion) {
+	public String valueQuestion;
+	public ValueMenu(String title, String[] options, String[] commands, String vQuestion) {
 		super(title, options, commands);
 		valueQuestion = vQuestion;
 	}
@@ -19,12 +19,17 @@ public class MetaModValueMenu extends MetaModMenu {
 		// Check if player is just responding to value question
 		if( valuesPending.get(player) != null )
 		{
-			//player.sendMessage("Got value: " + response);
-			String command = valuesPending.get(player);
-			command += " " + r;
-			if( MenuMetaMod.debug )
-				player.sendMessage("performCommand: " + command);
-			player.performCommand( command );
+			String[] comArray = valuesPending.get(player);
+			
+			for(String command : comArray)
+			{
+				command = getCommand(player, command);
+				command = command.replaceAll("*value*", r);
+				if( MenuMetaMod.debug )
+					player.sendMessage("performCommand: " + command);
+				player.performCommand( command );
+			}
+			
 			valuesPending.remove(player);
 			return ResponseStatus.HandledFinished;
 		}
@@ -70,7 +75,14 @@ public class MetaModValueMenu extends MetaModMenu {
 					player.sendMessage("##Value_" + valueQuestion);
 				else*/
 					player.sendMessage(valueQuestion);
-				valuesPending.put(player, commands[optionOffset+response-1]);
+				String[] comArray = new String[1];
+				if( commands[optionOffset+response-1].contains(";") )
+				{
+					comArray = commands[optionOffset+response-1].split(";");
+				}
+				else
+					comArray[0] = commands[optionOffset+response-1];
+				valuesPending.put(player, comArray);
 				return ResponseStatus.Handled;
 			}
 		}

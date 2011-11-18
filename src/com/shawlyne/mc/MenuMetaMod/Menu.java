@@ -3,7 +3,7 @@ package com.shawlyne.mc.MenuMetaMod;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-public class MetaModMenu {
+public class Menu {
 	protected static String[] optionText = { // So index 0 shows "1" etc
 		"1","2","3","4","5",
 		"6","7","8","9","0"						    
@@ -19,7 +19,7 @@ public class MetaModMenu {
 	public int optionCount;
 	protected int page;
 	
-	public MetaModMenu(String t, String[] o, String[] c){// throws Exception {
+	public Menu(String t, String[] o, String[] c){// throws Exception {
 		title = t;
 		options = o;
 		commands = c;
@@ -30,7 +30,7 @@ public class MetaModMenu {
 		}
 		
 		
-		optionCount = this.options.length;
+		optionCount = options.length;
 		pages = 1;
 		
 		if( optionCount > 9 ) // 10 is exit / next page
@@ -40,7 +40,7 @@ public class MetaModMenu {
 			if( options % 8 != 0 )
 				pages++;
 		}
-		System.out.println(pages + " pages from " + this.options.length + " options");
+		System.out.println(pages + " pages from " + optionCount + " options");
 	}
 	
 	
@@ -77,9 +77,9 @@ public class MetaModMenu {
     	
     	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
     	// check not too many optionsToSend
-		if( (options.length - firstOption) < optionsToSend )
+		if( (optionCount - firstOption) < optionsToSend )
 		{
-			optionsToSend = options.length - firstOption;
+			optionsToSend = optionCount - firstOption;
 		}
     	
     	player.sendMessage(title);
@@ -156,6 +156,7 @@ public class MetaModMenu {
 				
 				for(String command : comArray)
 				{
+					command = getCommand(player, command);
 					if( MenuMetaMod.debug )
 						player.sendMessage("Performing command " + command);
 					player.performCommand( command );
@@ -186,6 +187,11 @@ public class MetaModMenu {
     
 
 
-
+	public static String getCommand(Player p, String c)
+	{
+		String command = c.replaceAll(p.getName(),"*user*");
+		
+		return command;
+	}
 	
 }
