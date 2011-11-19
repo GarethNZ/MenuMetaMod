@@ -16,16 +16,20 @@ public class MenuInputListener extends InputListener
 
 	public void onKeyReleasedEvent(KeyReleasedEvent event)
 	{
+		System.out.println("["+event.getPlayer().getDisplayName()+"]Got key press: "+event.getKey().toString());
+		
 		if( MenuMetaModPlayerManager.playerMenus.containsKey(event.getPlayer()) ) // Has menu open
 		{
-			System.out.println("["+event.getPlayer().getDisplayName()+"]Got key press: "+event.getKey().toString());
-			MenuMetaModPlayerManager.onPlayerKeyResponse(event.getPlayer(),event.getKey());
+			if( !(MenuMetaModPlayerManager.playerMenus.get(event.getPlayer()) instanceof ValueMenu) )// value menus with SpoutClient handled magically
+				MenuMetaModPlayerManager.onPlayerKeyResponse(event.getPlayer(),event.getKey());
 		}
 		else if( event.getKey() == Keyboard.KEY_K ) {
 			// Send default quick menu
 			//System.out.println("[K Pushed] Sending quick menu");
 			// Check if a popup is open
 			SpoutPlayer player = (SpoutPlayer)event.getPlayer();
+			System.out.println(" player.getActiveScreen() = " +  player.getActiveScreen());
+			
 			if( player.getActiveScreen() == ScreenType.GAME_SCREEN ) // No other screens active
 			{
 				MenuMetaModPlayerManager.sendMenu(event.getPlayer(), MenuMetaMod.quickMenu);

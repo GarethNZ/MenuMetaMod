@@ -8,9 +8,6 @@ import org.bukkit.event.player.PlayerListener;
 import org.getspout.spoutapi.keyboard.Keyboard;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
-import com.shawlyne.mc.MenuMetaMod.Client.ClientMenu;
-import com.shawlyne.mc.MenuMetaMod.Client.ClientValueMenu;
-
 /**
  * Handle events for all Player related events
  * @author GarethNZ
@@ -29,10 +26,8 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 
 	public static HashMap<Player,Menu> playerMenus = new HashMap<Player,Menu>();
 	//public static HashMap<Player,Integer> playerPage = new HashMap<Player,Integer>();
-	//public static HashMap<Player,Boolean> playerClientMod = new HashMap<Player,Boolean>();
 	
-    
-    /**
+	/**
      * Handle response.. if it is a response to a menu
      * else ignore
      * TODO: Handle MCMenu response???
@@ -82,10 +77,7 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 		}*/
 		
 		ResponseStatus handled;
-		if( menu instanceof ClientMenu )
-			handled = ((ClientMenu)menu).handleResponse(player, response);
-		else
-			handled = menu.handleResponse(player, response);
+		handled = menu.handleResponse(player, response);
 		
 		if( handled == ResponseStatus.NotHandled )
 		{
@@ -99,9 +91,8 @@ public class MenuMetaModPlayerManager extends PlayerListener {
 			if( playerMenus.get(player) != menu )
 			{
 				// A new command must have changed the menu
+				// IGNORE
 				// Hopefully this is the correct behaviour
-				if( MenuMetaMod.debug )
-					MenuMetaMod.log.info("Hmmm... asynchronous / I dunno what order, but now the player has a new menu...");
 			}
 			else
 			{
@@ -130,25 +121,6 @@ public class MenuMetaModPlayerManager extends PlayerListener {
      */
     public static boolean sendMenu(Player player, Menu menu)
     {
-    	if( player instanceof SpoutPlayer && ((SpoutPlayer)player).isSpoutCraftEnabled())
-    	{ 
-    		SpoutPlayer sp = (SpoutPlayer)player;
-    		if( (menu instanceof Menu) )
-    		{
-	    		ClientMenu cMenu = new ClientMenu(menu.title, menu.options, menu.commands);
-	    		System.out.println("Sending a ClientMenu instead of MetaModMenu");
-	    		playerMenus.put(player, cMenu);
-		    	return cMenu.sendPage((SpoutPlayer)player, 0);
-    		}
-    		else if( (menu instanceof ValueMenu) )
-    		{
-    			ClientValueMenu cMenu = new ClientValueMenu(menu.title, menu.options, menu.commands, ((ValueMenu)menu).valueQuestion);
-	    		System.out.println("Sending a ClientValueMenu instead of MetaModValueMenu");
-	    		playerMenus.put(player, cMenu);
-		    	return cMenu.sendPage((SpoutPlayer)player, 0);
-    		}
-    	}
-    	
     	playerMenus.put(player, menu);
 	    return menu.sendPage(player, 0);
     }

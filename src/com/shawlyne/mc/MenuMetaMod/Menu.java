@@ -1,7 +1,18 @@
 package com.shawlyne.mc.MenuMetaMod;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.getspout.spoutapi.gui.GenericLabel;
+import org.getspout.spoutapi.gui.GenericPopup;
+import org.getspout.spoutapi.gui.GenericTexture;
+import org.getspout.spoutapi.gui.InGameHUD;
+import org.getspout.spoutapi.gui.Widget;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import com.shawlyne.mc.MenuMetaMod.threads.CommandRunner;
 
 public class Menu {
 	protected static String[] optionText = { // So index 0 shows "1" etc
@@ -14,6 +25,12 @@ public class Menu {
 	public String[] options;// text
 	public String[] commands; // result
 	protected long sendTime; // used for timeout
+	
+	// For SpoutCraft Clients:
+	public GenericTexture bgImage = null;
+	public ArrayList<Widget> widgets = new ArrayList<Widget>();
+	public GenericLabel menuTitle = null;
+	
 	
 	public int pages;
 	public int optionCount;
@@ -61,9 +78,16 @@ public class Menu {
 			return false;
 	}*/
 	
-	public boolean sendPage(Player player, int p)
+	public boolean sendPage(Player p, int pg)
 	{
-		page = p+1; // 0 --> Page 1 etc
+		SpoutPlayer player = (SpoutPlayer)p;
+		player.sendMessage("Sending menu " + title);
+		if( player.isSpoutCraftEnabled() )
+		{
+			return sendPopup(player, pg);
+		}
+		
+		page = pg+1; // 0 --> Page 1 etc
     	if( page > pages )
     		return false; // throw error?
     	
@@ -109,12 +133,148 @@ public class Menu {
 		return true;
 	}
 	
-	// Expected Response: 1-9,0
-	public ResponseStatus handleResponse(Player player, String r) // 1 - 10
+	public boolean sendPopup(Player p, int pg)
 	{
+		SpoutPlayer player = (SpoutPlayer)p;
+		InGameHUD main = player.getMainScreen();
+		GenericPopup popup = new GenericPopup();
+		page = pg+1; // 0 --> Page 1 etc
+		widgets.clear();
+
+		if( main.getActivePopup() != null )
+		{
+			main = player.getMainScreen();
+			player.closeActiveWindow();
+			main = player.getMainScreen();
+		}
+		
+		/*bgImage.setAnchor(WidgetAnchor.TOP_LEFT);
+		bgImage.setWidth(main.getWidth() / 3);
+		bgImage.setHeight(main.getHeight());
+		bgImage.setPriority(RenderPriority.Highest);
+		widgets.add(bgImage.setPriority);*/
+
+		menuTitle = new GenericLabel();
+		menuTitle.setText(title);
+		menuTitle.setWidth(title.length() * 5);
+		menuTitle.setHeight(5);
+		menuTitle.setX(11);
+		menuTitle.setY(20);//bgImage.getHeight() / 10);
+		widgets.add(menuTitle);
+		
+		int popupWidth = title.length() * 5;
+		
+		
+		if( page > pages )
+    		return false; // throw error?
+    	
+    	int firstOption = 0;
+    	
+			
+    	if( page > 1 )
+		{
+			firstOption = 9;
+			firstOption += ((page-2)*8); // not first 2 pages
+		}
+    	
+    	int optionsToSend = (page==1)?9:8; // 9 for page 1, else 8
+    	// check not too many optionsToSend
+		if( (optionCount - firstOption) < optionsToSend )
+		{
+			optionsToSend = optionCount - firstOption;
+		}
+    	
+    	int o = 0;
+    	for(; o < optionsToSend ; o++)
+    	{
+    		GenericLabel inputOption = new GenericLabel(optionText[o]+". "+options[firstOption+o]);
+			inputOption.setWidth(popupWidth);
+			inputOption.setHeight(20);
+			inputOption.setX(20);
+			inputOption.setY(20 * (o + 2));
+			widgets.add(inputOption);
+    	}
+    	// Add next / prev / Cancel
+    	if( page > 1 )
+		{
+			// Add a 'prev page option'
+			GenericLabel inputOption = new GenericLabel("9. "+ChatColor.BLUE + "Prev Page");
+			inputOption.setWidth(popupWidth);
+			inputOption.setHeight(20);
+			inputOption.setX(20);
+			inputOption.setY(20 * (o + 2));
+			widgets.add(inputOption);
+			o++;
+		}
+		if( pages > page )
+		{
+			// Add a 'next page option'
+			GenericLabel inputOption = new GenericLabel("0. "+ChatColor.BLUE + "Next Page");
+			inputOption.setWidth(popupWidth);
+			inputOption.setHeight(20);
+			inputOption.setX(20);
+			inputOption.setY(20 * (o + 2));
+			widgets.add(inputOption);
+			System.out.println(pages + " > " + page + " - NextPage button added");
+		}
+		if( pages == page )
+		{
+			// Add an 'Exit page option'
+			GenericLabel inputOption = new GenericLabel("0. "+ChatColor.BLUE + "Cancel");
+			inputOption.setWidth(popupWidth);
+			inputOption.setHeight(20);
+			inputOption.setX(20);
+			inputOption.setY(20 * (o + 2));
+			widgets.add(inputOption);
+			System.out.println(pages + " == " + page + " - Cancel button added");
+		}
+		
+		for (Widget widget : widgets) {
+          popup.attachWidget(MenuMetaMod.plugin, widget);
+        }
+		main.attachPopupScreen(popup);
+		sendTime = new Date().getTime();
+    	return true;
+		
+		
+	}
+
+	
+	
+	public ResponseStatus handleResponse(Player p, String r) // Numbered responses are 1 - 10
+	{
+		SpoutPlayer player = (SpoutPlayer)p;
 		int optionOffset = 0;
+		if( MenuMetaMod.debug )
+			System.out.println("[Menu] handleResponse: " + r);
+		
+		InGameHUD main = null;
+		if( player.isSpoutCraftEnabled() )
+		{
+			main = player.getMainScreen();
+			if( r.equalsIgnoreCase("ESCAPE") )
+			{
+				if( main.getActivePopup() != null )
+				{
+					player.closeActiveWindow();
+				}
+				return ResponseStatus.HandledFinished;
+			}
+		}
+		
 		if( isNumber(r) )
 		{
+			if( player.isSpoutCraftEnabled() )
+			{
+				// Close the popup
+				// Main set in 1st if SpoutCraft
+				if( main.getActivePopup() != null )
+				{
+					player.closeActiveWindow();
+				}
+				else
+					return ResponseStatus.NotHandled; // No menu to handle (WTF)
+			}
 			int response = Integer.valueOf(r).intValue();
 		
 			if( response == 0 ) response = 10; // 0 = the tenth
@@ -142,11 +302,11 @@ public class Menu {
 				optionOffset = 9;
 				optionOffset += ((page-2)*8); // not first two
 			}
-			if( commands.length < (optionOffset+response) )
+			if( commands.length < (optionOffset+response-1) )
 				return ResponseStatus.NotHandled;
 			else
 			{
-				// Accept Multiple Commands
+				// Single command to array
 				String[] comArray = {commands[optionOffset+response-1]};
 				// Split Multiple Commands
 				if( commands[optionOffset+response-1].contains(";") )
@@ -154,13 +314,8 @@ public class Menu {
 					comArray = commands[optionOffset+response-1].split(";");
 				}
 				
-				for(String command : comArray)
-				{
-					command = getCommand(player, command);
-					if( MenuMetaMod.debug )
-						player.sendMessage("Performing command " + command);
-					player.performCommand( command );
-				}
+				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new CommandRunner(player, comArray), 1);
+				
 				
 				return ResponseStatus.HandledFinished;
 			}
@@ -189,8 +344,7 @@ public class Menu {
 
 	public static String getCommand(Player p, String c)
 	{
-		String command = c.replaceAll(p.getName(),"*user*");
-		
+		String command = c.replaceAll("\\*user\\*", p.getName());
 		return command;
 	}
 	

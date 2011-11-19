@@ -1,27 +1,27 @@
 menus:
-    #------- First Menu - also accessible via /quick
+    #------- First Menu - also accessible via /qm
     # Menu Title:
-    Super Quick Menu:
+    Default Menu:
         #Menu Type
         type: Menu
-        #Command to open the menu e.g. /quick menu1
+        #Command to open the menu e.g. /qm menu1
         command: menu1
         # Menu Option List
         options: 
             # Option Text : Option Command
-            Warp Menu : /wm
-            Warp to Spawn : /warp spawn
+            An Option : /say Option selected
+            Show me a Value Menu : /qm menu2
     #------- Second Menu
     # Menu Title:
-    Some other Menu Title:
+    Default Value Menu:
         #Menu Type
         type: ValueMenu
-        #Command to open the menu e.g. /quick menu2
+        #Command to open the menu e.g. /qm menu2
         command: menu2
         # Question to ask after option # has been chosen
         question: How many do you want?
         # Menu Option List
         options: 
             # Option Text : Option Command
-            Give me cheese : /give me cheese
-            Give me cake : /give me cake
+            Give me cheese : /give *user* cheese
+            Give me cake : /give *user* cake

@@ -1,8 +1,17 @@
 package com.shawlyne.mc.MenuMetaMod;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import org.bukkit.entity.Player;
+import org.getspout.spoutapi.gui.GenericLabel;
+import org.getspout.spoutapi.gui.GenericPopup;
+import org.getspout.spoutapi.gui.GenericTextField;
+import org.getspout.spoutapi.gui.InGameHUD;
+import org.getspout.spoutapi.gui.Widget;
+import org.getspout.spoutapi.player.SpoutPlayer;
+
+import com.shawlyne.mc.MenuMetaMod.threads.QuestionSender;
 
 public class ValueMenu extends Menu {
 	static HashMap<Player,String[]> valuesPending = new HashMap<Player,String[]>(); // Store player + command which we will append the value to
@@ -13,9 +22,99 @@ public class ValueMenu extends Menu {
 		valueQuestion = vQuestion;
 	}
 	
-	
-	public ResponseStatus handleResponse(Player player, String r, int page) 
+	public boolean sendQuestionPopup(Player p)
 	{
+		SpoutPlayer player = (SpoutPlayer)p;
+		InGameHUD main = player.getMainScreen();
+		GenericPopup popup = new GenericPopup();
+		widgets.clear();
+
+		if( main.getActivePopup() != null )
+		{
+			player.closeActiveWindow();
+		}
+		/*bgImage.setAnchor(WidgetAnchor.TOP_LEFT);
+		bgImage.setWidth(main.getWidth() / 3);
+		bgImage.setHeight(main.getHeight());
+		bgImage.setPriority(RenderPriority.Highest);
+		widgets.add(bgImage.setPriority);*/
+
+		menuTitle = new GenericLabel();
+		menuTitle.setText(title);
+		menuTitle.setWidth(title.length() * 5);
+		menuTitle.setHeight(5);
+		menuTitle.setX(11);
+		menuTitle.setY(20);//bgImage.getHeight() / 10);
+		widgets.add(menuTitle);
+		
+		int popupWidth = title.length() * 5;
+		
+		
+		GenericLabel questionLabel = new GenericLabel(valueQuestion);
+		questionLabel.setWidth(popupWidth);
+		questionLabel.setHeight(20);
+		questionLabel.setX(20);
+		questionLabel.setY(40);
+		widgets.add(questionLabel);
+
+		GenericTextField inputValue = new GenericTextField();
+		inputValue.setWidth(popupWidth);
+		inputValue.setHeight(20);
+		inputValue.setX(20);
+		inputValue.setY(100);
+		widgets.add(inputValue);
+		
+			
+		// Add an 'Exit page option'
+		GenericLabel inputOption = new GenericLabel( "Escape to Cancel");
+		inputOption.setWidth(popupWidth);
+		inputOption.setHeight(20);
+		inputOption.setX(20);
+		inputOption.setY(20 * 60);
+		widgets.add(inputOption);
+		
+		for (Widget widget : widgets) {
+          popup.attachWidget(MenuMetaMod.plugin, widget);
+        }
+		main.attachPopupScreen(popup);
+		sendTime = new Date().getTime();
+    	return true;
+	}
+	
+	public boolean sendQuestion(Player p)
+	{
+		SpoutPlayer player = (SpoutPlayer)p;
+		player.sendMessage("Sending question " + valueQuestion);
+		if( player.isSpoutCraftEnabled() )
+		{
+			return sendQuestionPopup(player);
+		}
+			
+		player.sendMessage(valueQuestion);
+		return true;
+	}
+	
+	public ResponseStatus handleResponse(Player p, String r)
+	{
+		SpoutPlayer player = (SpoutPlayer)p;
+		int optionOffset = 0;
+		if( MenuMetaMod.debug )
+			System.out.println("[Menu] handleResponse: " + r);
+		
+		InGameHUD main = null;
+		if( player.isSpoutCraftEnabled() )
+		{
+			main = player.getMainScreen();
+			if( r.equalsIgnoreCase("ESCAPE") )
+			{
+				if( main.getActivePopup() != null )
+				{
+					player.closeActiveWindow();
+				}
+				return ResponseStatus.HandledFinished;
+			}
+		}
+		
 		// Check if player is just responding to value question
 		if( valuesPending.get(player) != null )
 		{
@@ -24,7 +123,7 @@ public class ValueMenu extends Menu {
 			for(String command : comArray)
 			{
 				command = getCommand(player, command);
-				command = command.replaceAll("*value*", r);
+				command = command.replaceAll("\\*value\\*", r);
 				if( MenuMetaMod.debug )
 					player.sendMessage("performCommand: " + command);
 				player.performCommand( command );
@@ -36,11 +135,21 @@ public class ValueMenu extends Menu {
 		
 		if( isNumber(r) )
 		{
+			if( player.isSpoutCraftEnabled() )
+			{
+				// Close the popup
+				if( main.getActivePopup() != null )
+				{
+					player.closeActiveWindow();
+				}
+				else
+					return ResponseStatus.NotHandled; // No menu to handle (WTF)
+			}
+			
 			int response = Integer.valueOf(r).intValue();
 		
 			// NOTE: Can't call super.handleResponse because we also need to add valuesPending :(
 			// Normal MetaModMenu behaviour
-			int optionOffset = 0;
 			
 			if( response == 0 ) response = 10; // 0 = the tenth
 			
@@ -71,23 +180,23 @@ public class ValueMenu extends Menu {
 				return ResponseStatus.NotHandled;
 			else
 			{
-				/*if( MenuMetaModPlayerManager.playerClientMod.get(player) != null )
-					player.sendMessage("##Value_" + valueQuestion);
-				else*/
-					player.sendMessage(valueQuestion);
-				String[] comArray = new String[1];
+				// Single command to array
+				String[] comArray = {commands[optionOffset+response-1]};
+				// Split Multiple Commands
 				if( commands[optionOffset+response-1].contains(";") )
 				{
 					comArray = commands[optionOffset+response-1].split(";");
 				}
-				else
-					comArray[0] = commands[optionOffset+response-1];
 				valuesPending.put(player, comArray);
-				return ResponseStatus.Handled;
+				
+				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new QuestionSender(player, this), 1);
+				
+				if( sendQuestion(player) )
+					return ResponseStatus.Handled;
 			}
 		}
-		else
-			return ResponseStatus.NotHandled;
+		
+		return ResponseStatus.NotHandled;
 	}
 
 }
