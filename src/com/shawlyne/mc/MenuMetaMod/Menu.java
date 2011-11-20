@@ -314,7 +314,7 @@ public class Menu {
 					comArray = commands[optionOffset+response-1].split(";");
 				}
 				
-				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new CommandRunner(player, comArray), 1);
+				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new CommandRunner(player, comArray), 5);
 				
 				
 				return ResponseStatus.HandledFinished;

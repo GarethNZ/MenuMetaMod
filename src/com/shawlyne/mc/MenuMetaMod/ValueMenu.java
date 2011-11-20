@@ -3,7 +3,12 @@ package com.shawlyne.mc.MenuMetaMod;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Priority;
+import org.bukkit.plugin.PluginManager;
+import org.getspout.spoutapi.gui.GenericButton;
 import org.getspout.spoutapi.gui.GenericLabel;
 import org.getspout.spoutapi.gui.GenericPopup;
 import org.getspout.spoutapi.gui.GenericTextField;
@@ -16,10 +21,19 @@ import com.shawlyne.mc.MenuMetaMod.threads.QuestionSender;
 public class ValueMenu extends Menu {
 	static HashMap<Player,String[]> valuesPending = new HashMap<Player,String[]>(); // Store player + command which we will append the value to
 	
+	static HashMap<Player,GenericTextField> inputTextFields = new HashMap<Player,GenericTextField>(); // Store values as they come from SpoutPopup 
+	
+	// For SpoutCraft
+	QuestionListener spoutListener = new QuestionListener(this);
+	
 	public String valueQuestion;
 	public ValueMenu(String title, String[] options, String[] commands, String vQuestion) {
 		super(title, options, commands);
 		valueQuestion = vQuestion;
+		
+		PluginManager pm = Bukkit.getServer().getPluginManager();
+		pm.registerEvent(Event.Type.CUSTOM_EVENT, spoutListener, Priority.Normal, MenuMetaMod.plugin);
+		
 	}
 	
 	public boolean sendQuestionPopup(Player p)
@@ -57,12 +71,24 @@ public class ValueMenu extends Menu {
 		questionLabel.setY(40);
 		widgets.add(questionLabel);
 
+		
 		GenericTextField inputValue = new GenericTextField();
 		inputValue.setWidth(popupWidth);
 		inputValue.setHeight(20);
 		inputValue.setX(20);
-		inputValue.setY(100);
+		inputValue.setY(60);
+		inputValue.setFocus(true);
 		widgets.add(inputValue);
+		
+		inputTextFields.put(p, inputValue); 
+		
+		// Add a Send / Enter button
+		GenericButton  sendButton = new GenericButton ("Send");
+		sendButton.setWidth(popupWidth);
+		sendButton.setHeight(20);
+		sendButton.setX(20);
+		sendButton.setY(90);
+		widgets.add(sendButton);
 		
 			
 		// Add an 'Exit page option'
@@ -70,13 +96,16 @@ public class ValueMenu extends Menu {
 		inputOption.setWidth(popupWidth);
 		inputOption.setHeight(20);
 		inputOption.setX(20);
-		inputOption.setY(20 * 60);
+		inputOption.setY(120);
 		widgets.add(inputOption);
 		
 		for (Widget widget : widgets) {
           popup.attachWidget(MenuMetaMod.plugin, widget);
         }
 		main.attachPopupScreen(popup);
+		
+		
+		
 		sendTime = new Date().getTime();
     	return true;
 	}
@@ -116,20 +145,46 @@ public class ValueMenu extends Menu {
 		}
 		
 		// Check if player is just responding to value question
-		if( valuesPending.get(player) != null )
+		if( valuesPending.get(player) != null ) 
 		{
+			String value = r;
+			if( inputTextFields.get(player) != null )
+			{
+				if( r.equals("RETURN") ) 
+				{
+					// KeyBoard has sent enter... now use the stored value
+					value = inputTextFields.get(player).getText();
+					inputTextFields.remove(player);
+				}
+				else
+				{
+					System.out.println("Waiting for enter");
+					return ResponseStatus.Handled; // But not finished
+				}
+			}
+			
 			String[] comArray = valuesPending.get(player);
 			
 			for(String command : comArray)
 			{
 				command = getCommand(player, command);
-				command = command.replaceAll("\\*value\\*", r);
+				command = command.replaceAll("\\*value\\*", value);
 				if( MenuMetaMod.debug )
 					player.sendMessage("performCommand: " + command);
 				player.performCommand( command );
 			}
 			
 			valuesPending.remove(player);
+			
+			if( player.isSpoutCraftEnabled() ) // Remove popup
+			{
+				main = player.getMainScreen();
+				if( main.getActivePopup() != null )
+				{
+					player.closeActiveWindow();
+				}
+			}
+			
 			return ResponseStatus.HandledFinished;
 		}
 		
@@ -189,7 +244,7 @@ public class ValueMenu extends Menu {
 				}
 				valuesPending.put(player, comArray);
 				
-				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new QuestionSender(player, this), 1);
+				MenuMetaMod.plugin.scheduler.scheduleSyncDelayedTask(MenuMetaMod.plugin, new QuestionSender(player, this), 5);
 				
 				if( sendQuestion(player) )
 					return ResponseStatus.Handled;
