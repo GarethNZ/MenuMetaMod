@@ -3,11 +3,7 @@ package com.shawlyne.mc.MenuMetaMod;
 import java.util.Date;
 import java.util.HashMap;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.PluginManager;
 import org.getspout.spoutapi.gui.GenericButton;
 import org.getspout.spoutapi.gui.GenericLabel;
 import org.getspout.spoutapi.gui.GenericPopup;
@@ -23,18 +19,16 @@ public class ValueMenu extends Menu {
 	
 	static HashMap<Player,QuickTextField> inputTextFields = new HashMap<Player,QuickTextField>(); // Store values as they come from SpoutPopup 
 	
-	// For SpoutCraft
-	QuestionListener spoutListener = new QuestionListener(this);
 	
 	public String valueQuestion;
+	
 	public ValueMenu(String title, String[] options, String[] commands, String vQuestion) {
 		super(title, options, commands);
 		valueQuestion = vQuestion;
 		
 		spoutResponse = true;
 		
-		PluginManager pm = Bukkit.getServer().getPluginManager();
-		pm.registerEvent(Event.Type.CUSTOM_EVENT, spoutListener, Priority.Normal, MenuMetaMod.plugin);
+		
 		
 	}
 	

@@ -64,6 +64,8 @@ public class MenuMetaModPlayerManager extends PlayerListener {
     
     public static void onPlayerResponse(Player player, String response)
     {
+    	System.out.println("[MenuMetaModPlayerManager] handleResponse: " + player.getDisplayName() + " - " + response);
+    	
     	Menu menu = null;
     	if( playerMenus.get(player) == null )
     		return;

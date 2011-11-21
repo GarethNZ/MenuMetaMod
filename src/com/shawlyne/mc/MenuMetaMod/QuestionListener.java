@@ -4,11 +4,10 @@ import org.getspout.spoutapi.event.screen.ButtonClickEvent;
 import org.getspout.spoutapi.event.screen.ScreenListener;
 
 public class QuestionListener extends ScreenListener {
-	ValueMenu menu;
 	
-	public QuestionListener(ValueMenu m)
+	public QuestionListener()
 	{
-		menu = m;
+		super();
 	}
 	
 	/*public void onTextFieldChange(TextFieldChangeEvent event) 

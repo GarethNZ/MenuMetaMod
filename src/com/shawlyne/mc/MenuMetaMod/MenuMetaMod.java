@@ -33,8 +33,12 @@ public class MenuMetaMod extends JavaPlugin {
     protected FileConfiguration config;
     // Menus accessible by "/quick <String>"
     static HashMap<String,Menu> configuredMenus = new HashMap<String,Menu>(); // command,menu
-    static Menu quickMenu; // default menu that responds to "/quick"
+    public static Menu quickMenu; // default menu that responds to "/quick"
 
+    // For SpoutCraft
+	QuestionListener questionListener = new QuestionListener();
+	
+	
     public BukkitScheduler scheduler; 
     
     public MenuMetaMod()
@@ -129,7 +133,7 @@ public class MenuMetaMod extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_CHAT, playerManager, Priority.Monitor, this);
         pm.registerEvent(Event.Type.CUSTOM_EVENT, new MenuInputListener(), Event.Priority.Low, this);
         pm.registerEvent(Event.Type.CUSTOM_EVENT, new MenuScreenListener(), Event.Priority.Low, this);
-        
+        pm.registerEvent(Event.Type.CUSTOM_EVENT, questionListener, Priority.Normal, MenuMetaMod.plugin);
         
         PluginDescriptionFile pdfFile = this.getDescription();
         System.out.println( pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!" );

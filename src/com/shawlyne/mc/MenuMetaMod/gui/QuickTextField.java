@@ -16,7 +16,7 @@ public class QuickTextField extends GenericTextField {
 	
 	public void onTypingFinished()
 	{
-		System.out.println("QuickTextField onTypingFinished " + this.getText());
+		//System.out.println("QuickTextField onTypingFinished " + this.getText());
 		
 		MenuMetaModPlayerManager.onPlayerResponse(player, this.getText());
 	}

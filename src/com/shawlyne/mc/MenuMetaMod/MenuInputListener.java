@@ -21,7 +21,7 @@ public class MenuInputListener extends InputListener
 		if( MenuMetaModPlayerManager.playerMenus.containsKey(event.getPlayer()) ) // Has menu open
 		{
 			// as long as we are not waiting on a special spout input
-			// TODO: use something static and not part of a sub-class of menusinstead 
+			// TODO: use something static and not part of a sub-class of Menu instead 
 			if( !ValueMenu.inputTextFields.containsKey(event.getPlayer()) )
 			//if( !MenuMetaModPlayerManager.playerMenus.get(event.getPlayer()).spoutResponse ) 
 				MenuMetaModPlayerManager.onPlayerKeyResponse(event.getPlayer(),event.getKey());
