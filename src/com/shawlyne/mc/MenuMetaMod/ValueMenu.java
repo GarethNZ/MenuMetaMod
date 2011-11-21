@@ -4,24 +4,24 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.PluginManager;
 import org.getspout.spoutapi.gui.GenericButton;
 import org.getspout.spoutapi.gui.GenericLabel;
 import org.getspout.spoutapi.gui.GenericPopup;
-import org.getspout.spoutapi.gui.GenericTextField;
 import org.getspout.spoutapi.gui.InGameHUD;
 import org.getspout.spoutapi.gui.Widget;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
+import com.shawlyne.mc.MenuMetaMod.gui.QuickTextField;
 import com.shawlyne.mc.MenuMetaMod.threads.QuestionSender;
 
 public class ValueMenu extends Menu {
 	static HashMap<Player,String[]> valuesPending = new HashMap<Player,String[]>(); // Store player + command which we will append the value to
 	
-	static HashMap<Player,GenericTextField> inputTextFields = new HashMap<Player,GenericTextField>(); // Store values as they come from SpoutPopup 
+	static HashMap<Player,QuickTextField> inputTextFields = new HashMap<Player,QuickTextField>(); // Store values as they come from SpoutPopup 
 	
 	// For SpoutCraft
 	QuestionListener spoutListener = new QuestionListener(this);
@@ -30,6 +30,8 @@ public class ValueMenu extends Menu {
 	public ValueMenu(String title, String[] options, String[] commands, String vQuestion) {
 		super(title, options, commands);
 		valueQuestion = vQuestion;
+		
+		spoutResponse = true;
 		
 		PluginManager pm = Bukkit.getServer().getPluginManager();
 		pm.registerEvent(Event.Type.CUSTOM_EVENT, spoutListener, Priority.Normal, MenuMetaMod.plugin);
@@ -72,7 +74,7 @@ public class ValueMenu extends Menu {
 		widgets.add(questionLabel);
 
 		
-		GenericTextField inputValue = new GenericTextField();
+		QuickTextField inputValue = new QuickTextField(player);
 		inputValue.setWidth(popupWidth);
 		inputValue.setHeight(20);
 		inputValue.setX(20);
@@ -125,10 +127,12 @@ public class ValueMenu extends Menu {
 	
 	public ResponseStatus handleResponse(Player p, String r)
 	{
+		System.out.println("[ValueMenu] handleResponse: " + p.getDisplayName() + " - " + r);
+		
 		SpoutPlayer player = (SpoutPlayer)p;
 		int optionOffset = 0;
 		if( MenuMetaMod.debug )
-			System.out.println("[Menu] handleResponse: " + r);
+			System.out.println("[ValueMenu] handleResponse: " + r);
 		
 		InGameHUD main = null;
 		if( player.isSpoutCraftEnabled() )
@@ -148,6 +152,9 @@ public class ValueMenu extends Menu {
 		if( valuesPending.get(player) != null ) 
 		{
 			String value = r;
+			
+			// If constantly monitoring the keyboard :(
+			/*  
 			if( inputTextFields.get(player) != null )
 			{
 				if( r.equals("RETURN") ) 
@@ -161,7 +168,7 @@ public class ValueMenu extends Menu {
 					System.out.println("Waiting for enter");
 					return ResponseStatus.Handled; // But not finished
 				}
-			}
+			}*/
 			
 			String[] comArray = valuesPending.get(player);
 			

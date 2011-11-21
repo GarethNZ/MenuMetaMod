@@ -28,7 +28,7 @@ public class QuestionListener extends ScreenListener {
 			if( ValueMenu.inputTextFields.get( event.getPlayer() ) != null )
 			{
 				System.out.println("Updated text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
-				MenuMetaModPlayerManager.onPlayerResponse(event.getPlayer(), "RETURN");
+				MenuMetaModPlayerManager.onPlayerResponse(event.getPlayer(), ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 			}
 		}
     }

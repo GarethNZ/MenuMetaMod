@@ -36,6 +36,12 @@ public class Menu {
 	public int optionCount;
 	protected int page;
 	
+	/**
+	 * Extended classes should set to true if they have a custom spout response 
+	 * true = disable keyboard listener
+	 */
+	public boolean spoutResponse = false;
+	
 	public Menu(String t, String[] o, String[] c){// throws Exception {
 		title = t;
 		options = o;
