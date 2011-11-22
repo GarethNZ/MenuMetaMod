@@ -13,7 +13,7 @@ public class QuestionListener extends ScreenListener {
 	
 	public void onTextFieldChange(TextFieldChangeEvent event) 
 	{
-		System.out.println("onTextFieldChange text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
+		System.out.println("onTextFieldChange text = " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 		
     }
 	
@@ -23,7 +23,7 @@ public class QuestionListener extends ScreenListener {
 		{
 			if( ValueMenu.inputTextFields.get( event.getPlayer() ) != null )
 			{
-				System.out.println("inputTextField text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
+				System.out.println("onButtonClick player: " + event.getPlayer().getDisplayName() + " text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 				MenuMetaModPlayerManager.onPlayerResponse(event.getPlayer(), ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 			}
 		}

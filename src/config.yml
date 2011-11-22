@@ -23,5 +23,5 @@ menus:
         # Menu Option List
         options: 
             # Option Text : Option Command
-            Give me cheese : /give *user* cheese
-            Give me cake : /give *user* cake
+            Give me cheese : /give *user* cheese *value*
+            Give me cake : /give *user* cake *value*

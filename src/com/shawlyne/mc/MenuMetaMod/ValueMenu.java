@@ -121,12 +121,10 @@ public class ValueMenu extends Menu {
 	
 	public ResponseStatus handleResponse(Player p, String r)
 	{
-		System.out.println("[ValueMenu] handleResponse: " + p.getDisplayName() + " - " + r);
-		
 		SpoutPlayer player = (SpoutPlayer)p;
 		int optionOffset = 0;
 		if( MenuMetaMod.debug )
-			System.out.println("[ValueMenu] handleResponse: " + r);
+			System.out.println("[ValueMenu] handleResponse: " + p.getDisplayName() + " - " + r);
 		
 		InGameHUD main = null;
 		if( player.isSpoutCraftEnabled() )
