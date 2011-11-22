@@ -308,7 +308,7 @@ public class Menu {
 				optionOffset = 9;
 				optionOffset += ((page-2)*8); // not first two
 			}
-			if( commands.length < (optionOffset+response-1) )
+			if( (optionOffset+response) > commands.length )
 				return ResponseStatus.NotHandled;
 			else
 			{

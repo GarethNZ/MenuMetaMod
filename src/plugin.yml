@@ -4,6 +4,8 @@ main: com.shawlyne.mc.MenuMetaMod.MenuMetaMod
 
 version: 1.0
 
+depend: [Spout]
+
 commands:
     qm:
         description: Quick launch config specified menus

@@ -2,6 +2,7 @@ package com.shawlyne.mc.MenuMetaMod;
 
 import org.getspout.spoutapi.event.screen.ButtonClickEvent;
 import org.getspout.spoutapi.event.screen.ScreenListener;
+import org.getspout.spoutapi.event.screen.TextFieldChangeEvent;
 
 public class QuestionListener extends ScreenListener {
 	
@@ -10,15 +11,11 @@ public class QuestionListener extends ScreenListener {
 		super();
 	}
 	
-	/*public void onTextFieldChange(TextFieldChangeEvent event) 
+	public void onTextFieldChange(TextFieldChangeEvent event) 
 	{
-		System.out.println("onTextFieldChange text " + event.getNewText());
-		if( ValueMenu.inputTextValues.get( event.getPlayer() ) != null )
-		{
-			System.out.println("Updated text " + event.getNewText());
-			ValueMenu.inputTextValues.put(event.getPlayer(), event.getNewText());
-		}
-    }*/
+		System.out.println("onTextFieldChange text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
+		
+    }
 	
 	public void onButtonClick(ButtonClickEvent event) 
 	{
@@ -26,7 +23,7 @@ public class QuestionListener extends ScreenListener {
 		{
 			if( ValueMenu.inputTextFields.get( event.getPlayer() ) != null )
 			{
-				System.out.println("Updated text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
+				System.out.println("inputTextField text " + ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 				MenuMetaModPlayerManager.onPlayerResponse(event.getPlayer(), ValueMenu.inputTextFields.get( event.getPlayer() ).getText());
 			}
 		}

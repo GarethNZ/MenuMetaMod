@@ -136,6 +136,7 @@ public class ValueMenu extends Menu {
 			{
 				if( main.getActivePopup() != null )
 				{
+					ValueMenu.inputTextFields.remove(p);
 					player.closeActiveWindow();
 				}
 				return ResponseStatus.HandledFinished;
@@ -182,6 +183,7 @@ public class ValueMenu extends Menu {
 				main = player.getMainScreen();
 				if( main.getActivePopup() != null )
 				{
+					ValueMenu.inputTextFields.remove(p);
 					player.closeActiveWindow();
 				}
 			}
@@ -196,6 +198,7 @@ public class ValueMenu extends Menu {
 				// Close the popup
 				if( main.getActivePopup() != null )
 				{
+					ValueMenu.inputTextFields.remove(p);
 					player.closeActiveWindow();
 				}
 				else
@@ -232,7 +235,7 @@ public class ValueMenu extends Menu {
 				optionOffset = 9;
 				optionOffset += ((page-2)*8); // not first two
 			}
-			if( commands.length < (optionOffset+response-1) )
+			if( (optionOffset+response) > commands.length )
 				return ResponseStatus.NotHandled;
 			else
 			{
